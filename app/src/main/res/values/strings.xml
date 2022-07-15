@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">Documenter</string>
+
+    <string name="about_documenter">
+        Documenter v%s<br/>\n
+        https://github.com/ViliusSutkus89/Documenter<br/>\n<br/>\n
+        Reference implementation application of pdf2htmlEX-Android and wvWare-Android<br/>\n
+    </string>
+    <string name="about_pdf2htmlEX">
+        pdf2htmlEX-Android v%s<br/>\n
+        https://github.com/ViliusSutkus89/pdf2htmlEX-Android<br/>\n<br/>\n
+
+        Android port of pdf2htmlEX<br/>\n
+        https://github.com/pdf2htmlEX/pdf2htmlEX<br/>\n
+
+        Convert PDF to HTML without losing text or format<br/>\n
+    </string>
+    <string name="about_wvWare">
+        wvWare-Android v%s<br/>\n
+        https://github.com/ViliusSutkus89/wvWare-Android<br/>\n<br/>\n
+
+        Android port of wvWare<br/>\n
+        http://wvware.sourceforge.net<br/>\n
+
+        Library to load and parse Word 2000, 97, 95 and 6 files<br/>\n
+    </string>
+    <string name="show_licenses">Show licenses</string>
+
+    <string name="webview_missing_label">WebView missing</string>
+    <string name="webview_prompt">Documenter requires \"Android System WebView\"</string>
+    <string name="webview_install">Install</string>
+    <string name="webview_no_marketplace">Failed to open app installer</string>
+
+    <string name="state_error">Error</string>
+    <string name="state_init">Initializing</string>
+    <string name="state_caching">Caching document</string>
+    <string name="state_cached">Document cached</string>
+    <string name="state_converting">Converting document</string>
+    <string name="state_converted">Document converted</string>
+
+    <string name="converter_worker_notification_channel_id">1</string>
+    <string name="converter_worker_notification_title">Converting document</string>
+    <string name="converter_worker_notification_channel_name">Document conversion notification process</string>
+    <string name="converter_worker_notification_channel_description">Notification channel used to notify user about currently active pdf/doc conversion process</string>
+    <string name="menu_about">about</string>
+</resources>

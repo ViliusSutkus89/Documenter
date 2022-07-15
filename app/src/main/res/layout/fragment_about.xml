@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.AboutFragment">
+    <data>
+        <variable name="documenterVersion" type="String" />
+        <variable name="pdf2htmlEXVersion" type="String" />
+        <variable name="wvWareVersion" type="String" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+
+            android:gravity="center"
+            android:singleLine="false"
+            android:text="@{@string/about_documenter(documenterVersion)}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+
+            android:gravity="center"
+            android:singleLine="false"
+            android:text="@{@string/about_pdf2htmlEX(pdf2htmlEXVersion)}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+
+            android:gravity="center"
+            android:singleLine="false"
+            android:text="@{@string/about_wvWare(wvWareVersion)}" />
+
+        <Button
+            android:id="@+id/show_licenses"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/show_licenses" />
+
+    </LinearLayout>
+</layout>
