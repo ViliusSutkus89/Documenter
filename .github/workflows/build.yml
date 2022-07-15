@@ -48,7 +48,7 @@ jobs:
           java-version: 11
       - uses: android-actions/setup-android@v2
 
-      - run: ./gradlew build #lintRelease
+      - run: ./gradlew build lintRelease
 
       - uses: actions/upload-artifact@v3
         with:
