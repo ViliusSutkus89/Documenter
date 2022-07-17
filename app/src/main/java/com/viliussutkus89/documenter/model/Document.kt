@@ -19,7 +19,6 @@
 
 package com.viliussutkus89.documenter.model
 
-import android.content.Context
 import android.net.Uri
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -50,12 +49,38 @@ data class Document(
 
     // example: myDocument.html
     @ColumnInfo(name = "converted_filename")
-    val convertedFilename: String? = "",
+    val convertedFilename: String? = null,
 
     @ColumnInfo(name = "last_accessed")
     val lastAccessed: Long = Date().time,
 
+    val state: State = State.Init,
+
+    @ColumnInfo(name = "scroll_selector")
+    val scrollSelector: String? = null,
+
+    @ColumnInfo(name = "scroll_left")
+    val scrollLeft: Int? = null,
+
+    @ColumnInfo(name = "scroll_top")
+    val scrollTop: Int? = null
+)
+
+data class DocumentScoped_Filename_State(
+    val id: Long,
+
+    val filename: String,
+
     val state: State = State.Init
+)
+
+data class DocumentScoped_Filename_ConvertedFilename(
+    val id: Long = 0,
+
+    val filename: String,
+
+    @ColumnInfo(name = "converted_filename")
+    val convertedFilename: String? = null
 )
 
 class StateIntConverter {
@@ -75,21 +100,44 @@ class UriStringConverter {
 }
 
 const val DOCUMENTS_DIR_IN_CACHE = "documents"
+const val DOCUMENTS_DIR_IN_FILES = "documents"
 
-fun Document.getCachedDir(cacheDir: File): File {
-    return File(File(cacheDir, DOCUMENTS_DIR_IN_CACHE), id.toString())
+fun Document.getCachedDir(appCacheDir: File): File {
+    val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
+    return File(cacheDir, id.toString())
 }
 
-fun Document.getFilesDir(filesDir: File): File {
-    return File(File(filesDir, DOCUMENTS_DIR_IN_CACHE), id.toString())
+fun Document.getFilesDir(appFilesDir: File): File {
+    val filesDir = File(appFilesDir, DOCUMENTS_DIR_IN_FILES)
+    return File(filesDir, id.toString())
 }
 
-fun Document.getCachedSourceFile(context: Context): File {
-    return File(getCachedDir(context.cacheDir), filename)
+fun Document.getCachedSourceFile(appCacheDir: File): File {
+    val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
+    val documentDir = File(cacheDir, id.toString())
+    return File(documentDir, filename)
 }
 
-fun Document.getConvertedHtmlFile(context: Context): File? {
-    return convertedFilename?.let {
-        File(getFilesDir(context.filesDir), convertedFilename)
-    }
+fun Document.getConvertedHtmlFile(appFilesDir: File): File? {
+    val filesDir = File(appFilesDir, DOCUMENTS_DIR_IN_FILES)
+    val documentDir = File(filesDir, id.toString())
+    return convertedFilename?.let { File(documentDir, convertedFilename) }
+}
+
+fun DocumentScoped_Filename_ConvertedFilename.getConvertedHtmlFile(appFilesDir: File): File? {
+    val filesDir = File(appFilesDir, DOCUMENTS_DIR_IN_FILES)
+    val documentDir = File(filesDir, id.toString())
+    return convertedFilename?.let { File(documentDir, convertedFilename) }
+}
+
+fun DocumentScoped_Filename_ConvertedFilename.getScreenshotFile(appCacheDir: File): File {
+    val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
+    val documentDir = File(cacheDir, id.toString())
+    return File(documentDir, "screenshot.png")
+}
+
+fun Document.getScreenshotFile(appCacheDir: File): File {
+    val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
+    val documentDir = File(cacheDir, id.toString())
+    return File(documentDir, "screenshot.png")
 }

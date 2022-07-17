@@ -54,8 +54,8 @@ class HomeViewModel(application: Application, private val documentDao: DocumentD
     fun removeDocument(document: Document) {
         viewModelScope.launch(Dispatchers.IO) {
             WorkManager.getInstance(app).cancelUniqueWork("document-${document.id}")
-            document.getCachedDir(app.cacheDir).deleteRecursively()
-            document.getFilesDir(app.filesDir).deleteRecursively()
+            document.getCachedDir(appCacheDir = app.cacheDir).deleteRecursively()
+            document.getFilesDir(appFilesDir = app.filesDir).deleteRecursively()
             documentDao.delete(document)
         }
     }
@@ -69,8 +69,8 @@ class HomeViewModel(application: Application, private val documentDao: DocumentD
             ))
             val document = documentDao.getDocument(documentId)
 
-            document.getCachedDir(app.cacheDir).mkdirs()
-            document.getFilesDir(app.filesDir).mkdirs()
+            document.getCachedDir(appCacheDir = app.cacheDir).mkdirs()
+            document.getFilesDir(appFilesDir = app.filesDir).mkdirs()
 
             result.postValue(documentId)
 

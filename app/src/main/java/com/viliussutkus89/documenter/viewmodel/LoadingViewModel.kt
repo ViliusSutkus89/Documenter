@@ -1,5 +1,5 @@
 /*
- * DocumentViewModel.kt
+ * LoadingViewModel.kt
  *
  * Copyright (C) 2022 ViliusSutkus89.com
  *
@@ -24,16 +24,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.viliussutkus89.documenter.model.DocumentDao
 
-class DocumentViewModel(documentId: Long, documentDao: DocumentDao) : ViewModel() {
+class LoadingViewModel(documentId: Long, documentDao: DocumentDao) : ViewModel() {
     class Factory(private val documentId: Long, private val documentDao: DocumentDao): ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(DocumentViewModel::class.java)) {
+            if (modelClass.isAssignableFrom(LoadingViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return DocumentViewModel(documentId, documentDao) as T
+                return LoadingViewModel(documentId, documentDao) as T
             }
-            throw IllegalArgumentException("Unable to construct DocumentViewModel")
+            throw IllegalArgumentException("Unable to construct LoadingViewModel")
         }
     }
 
-    val document = documentDao.getFilenameConvertedFilename(documentId).asLiveData()
+    val document = documentDao.getFilenameAndState(documentId).asLiveData()
 }

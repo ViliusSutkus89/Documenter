@@ -23,24 +23,24 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.model.State
-import com.viliussutkus89.documenter.viewmodel.DocumentViewModel
+import com.viliussutkus89.documenter.viewmodel.LoadingViewModel
 
 class LoadingFragment: Fragment(R.layout.fragment_loading) {
     private val args: DocumentFragmentArgs by navArgs()
 
-    private val documentViewModel: DocumentViewModel by activityViewModels {
+    private val viewModel: LoadingViewModel by viewModels {
         val app = requireActivity().application as DocumenterApplication
-        DocumentViewModel.Factory(app.documentDatabase.documentDao())
+        LoadingViewModel.Factory(args.documentId, app.documentDatabase.documentDao())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        documentViewModel.getDocument(args.documentId).observe(viewLifecycleOwner) { document ->
+        viewModel.document.observe(viewLifecycleOwner) { document ->
             if (State.Converted == document.state) {
                 val action = LoadingFragmentDirections.actionLoadingFragmentToDocumentFragment(args.documentId)
                 findNavController().navigate(action)

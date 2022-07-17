@@ -84,12 +84,12 @@ abstract class RemoteListenableWorkerCommon(ctx: Context, params: WorkerParamete
             var document = documentDao.getDocument(documentId).copy(state = State.Converting)
             documentDao.update(document)
 
-            val cachedFile = document.getCachedSourceFile(applicationContext)
+            val cachedFile = document.getCachedSourceFile(appCacheDir = applicationContext.cacheDir)
 
             val convertedFile = doWorkSync(cachedFile) ?: return@getFuture completer.set(Result.failure())
 
             document = document.copy(convertedFilename = convertedFile.name, state = State.Converted)
-            convertedFile.renameTo(document.getConvertedHtmlFile(applicationContext)!!)
+            convertedFile.renameTo(document.getConvertedHtmlFile(appFilesDir = applicationContext.filesDir)!!)
             documentDao.update(document)
 
             return@getFuture completer.set(Result.success())

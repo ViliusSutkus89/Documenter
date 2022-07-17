@@ -46,7 +46,7 @@ class SaveToCacheWorker(context: Context, params: WorkerParameters): Worker(cont
         val document = documentDao.getDocument(documentId).copy(state = State.Caching)
         documentDao.update(document)
 
-        val cached = document.getCachedSourceFile(applicationContext)
+        val cached = document.getCachedSourceFile(appCacheDir = applicationContext.cacheDir)
         if (!copyFromUriToFile(applicationContext.contentResolver, document.sourceUri, cached)){
             documentDao.update(document.copy(state = State.Error))
             return Result.failure()

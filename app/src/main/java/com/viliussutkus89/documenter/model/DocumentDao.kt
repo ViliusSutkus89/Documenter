@@ -30,9 +30,6 @@ interface DocumentDao {
     @Query("SELECT * FROM `document` WHERE id = :id")
     fun getDocument(id: Long): Document
 
-    @Query("SELECT * FROM `document` WHERE id = :id")
-    fun getDocumentFlow(id: Long): Flow<Document>
-
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insert(document: Document): Long
 
@@ -41,4 +38,13 @@ interface DocumentDao {
 
     @Delete
     fun delete(document: Document)
+
+    @Query("SELECT `id`, `filename`, `state` FROM `document` WHERE `id` = :id")
+    fun getFilenameAndState(id: Long): Flow<DocumentScoped_Filename_State>
+
+    @Query("SELECT `id`, `filename`, `converted_filename` FROM `document` WHERE `id` = :id")
+    fun getFilenameConvertedFilename(id: Long): Flow<DocumentScoped_Filename_ConvertedFilename>
+
+    @Query("UPDATE `document` SET `last_accessed` = :lastAccessed WHERE `id` = :id")
+    fun updateLastAccessed(id: Long, lastAccessed: Long)
 }

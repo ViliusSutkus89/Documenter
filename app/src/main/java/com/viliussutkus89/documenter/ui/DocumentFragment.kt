@@ -25,11 +25,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.databinding.FragmentDocumentBinding
 import com.viliussutkus89.documenter.model.getConvertedHtmlFile
+import com.viliussutkus89.documenter.utils.observeOnce
 import com.viliussutkus89.documenter.viewmodel.DocumentViewModel
 
 class DocumentFragment: Fragment() {
@@ -42,9 +43,9 @@ class DocumentFragment: Fragment() {
 
     private val args: DocumentFragmentArgs by navArgs()
 
-    private val documentViewModel: DocumentViewModel by activityViewModels {
+    private val viewModel: DocumentViewModel by viewModels {
         val app = requireActivity().application as DocumenterApplication
-        DocumentViewModel.Factory(app.documentDatabase.documentDao())
+        DocumentViewModel.Factory(args.documentId, app.documentDatabase.documentDao())
     }
 
     override fun onCreateView(
@@ -64,12 +65,11 @@ class DocumentFragment: Fragment() {
             allowFileAccess = true
         }
 
-        savedInstanceState?.getBundle(BUNDLE_KEY_DOCUMENT_VIEW)?.let {
-            binding.documentView.restoreState(it)
-        } ?: run {
-            documentViewModel.getDocument(args.documentId).observe(viewLifecycleOwner) { document ->
-                val htmlFile = document.getConvertedHtmlFile(requireContext())
-                htmlFile?.let {
+        viewModel.document.observeOnce(viewLifecycleOwner) { document ->
+            savedInstanceState?.getBundle(BUNDLE_KEY_DOCUMENT_VIEW)?.let {
+                binding.documentView.restoreState(it)
+            } ?: run {
+                document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
                     val convertedUri = FileProvider.getUriForFile(requireContext(), requireContext().packageName + ".provider", htmlFile)
                     binding.documentView.loadUrl(convertedUri.toString())
                 }
