@@ -42,7 +42,7 @@ class DocumentListAdapter(
         fun bind(doc: Document, appCacheDir: File, openListener: (Document) -> Unit, removeListener: (Document) -> Unit) {
             binding.apply {
                 document = doc
-                if (State.Converted == document.state) {
+                if (State.Converted == doc.state) {
                     thumbnail.setImageURI(doc.getScreenshotFile(appCacheDir).toUri())
                 } else {
                     thumbnail.setImageResource(R.drawable.loading_animation)
