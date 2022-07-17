@@ -67,10 +67,10 @@ class HomeFragment: Fragment() {
             val action = HomeFragmentDirections.actionHomeFragmentToWebViewInstallFragment()
             findNavController().navigate(action)
         }
-
         val adapter = DocumentListAdapter(
-            filenameClickListener = { document -> findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(document.id)) },
-            deleteClickListener = { document -> documentViewModel.removeDocument(document) }
+            appCacheDir = requireContext().cacheDir,
+            openListener = { findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(it.id)) },
+            removeListener = { documentViewModel.removeDocument(it) }
         )
         binding.recyclerView.adapter = adapter
         documentViewModel.documents.observe(viewLifecycleOwner) { documentList ->

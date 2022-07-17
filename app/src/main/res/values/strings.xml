@@ -31,6 +31,9 @@
     <string name="webview_install">Install</string>
     <string name="webview_no_marketplace">Failed to open app installer</string>
 
+    <string name="document_open">Open</string>
+    <string name="document_remove">Remove</string>
+
     <string name="state_error">Error</string>
     <string name="state_init">Initializing</string>
     <string name="state_caching">Caching document</string>
