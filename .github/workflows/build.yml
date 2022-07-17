@@ -19,7 +19,6 @@ name: build
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
     paths-ignore:
       - '**.md'
       - '.github/**'
