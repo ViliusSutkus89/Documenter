@@ -19,10 +19,17 @@
 
 package com.viliussutkus89.documenter.viewmodel
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.viliussutkus89.documenter.model.DocumentDao
+import com.viliussutkus89.documenter.model.getScreenshotFile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 
 class DocumentViewModel(documentId: Long, documentDao: DocumentDao) : ViewModel() {
     class Factory(private val documentId: Long, private val documentDao: DocumentDao): ViewModelProvider.Factory {
@@ -36,4 +43,12 @@ class DocumentViewModel(documentId: Long, documentDao: DocumentDao) : ViewModel(
     }
 
     val document = documentDao.getFilenameConvertedFilename(documentId).asLiveData()
+    fun saveBitmap(bitmap: Bitmap, appCacheDir: File) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val screenshot = document.value?.getScreenshotFile(appCacheDir)
+            FileOutputStream(screenshot).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 50, out)
+            }
+        }
+    }
 }

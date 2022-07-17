@@ -19,6 +19,8 @@
 
 package com.viliussutkus89.documenter.ui
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -48,6 +50,12 @@ class DocumentFragment: Fragment() {
         DocumentViewModel.Factory(args.documentId, app.documentDatabase.documentDao())
     }
 
+    private fun takeScreenshot() {
+        val view = binding.documentWrapper
+        val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        view.draw(Canvas(bitmap))
+        viewModel.saveBitmap(bitmap, requireContext().cacheDir)
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -76,6 +84,11 @@ class DocumentFragment: Fragment() {
             }
         }
         return binding.root
+    }
+
+    override fun onPause() {
+        super.onPause()
+        takeScreenshot()
     }
 
     override fun onDestroyView() {
