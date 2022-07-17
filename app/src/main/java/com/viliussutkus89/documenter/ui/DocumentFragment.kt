@@ -19,6 +19,7 @@
 
 package com.viliussutkus89.documenter.ui
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Bundle
@@ -56,6 +57,7 @@ class DocumentFragment: Fragment() {
         view.draw(Canvas(bitmap))
         viewModel.saveBitmap(bitmap, requireContext().cacheDir)
     }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -67,6 +69,7 @@ class DocumentFragment: Fragment() {
             setSupportZoom(true)
             builtInZoomControls = true
             displayZoomControls = true
+            @SuppressLint("SetJavaScriptEnabled")
             javaScriptEnabled = true
             allowContentAccess = true
             blockNetworkLoads = true
