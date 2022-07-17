@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.viliussutkus89.documenter">
 
-    <uses-feature android:name="android.software.webview" android:required="false" />
+    <uses-feature android:name="android.software.webview" android:required="true" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
