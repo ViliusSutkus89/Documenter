@@ -30,8 +30,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
+import java.util.*
 
-class DocumentViewModel(documentId: Long, documentDao: DocumentDao) : ViewModel() {
+class DocumentViewModel(private val documentId: Long, private val documentDao: DocumentDao) : ViewModel() {
     class Factory(private val documentId: Long, private val documentDao: DocumentDao): ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(DocumentViewModel::class.java)) {
@@ -43,12 +44,20 @@ class DocumentViewModel(documentId: Long, documentDao: DocumentDao) : ViewModel(
     }
 
     val document = documentDao.getFilenameConvertedFilename(documentId).asLiveData()
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            documentDao.updateLastAccessed(documentId, Date().time)
+        }
+    }
+
     fun saveBitmap(bitmap: Bitmap, appCacheDir: File) {
         viewModelScope.launch(Dispatchers.IO) {
             val screenshot = document.value?.getScreenshotFile(appCacheDir)
             FileOutputStream(screenshot).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 50, out)
             }
+            documentDao.updateLastAccessed(documentId, Date().time)
         }
     }
 }
