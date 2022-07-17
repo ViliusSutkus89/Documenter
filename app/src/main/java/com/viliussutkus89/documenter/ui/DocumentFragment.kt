@@ -68,7 +68,8 @@ class DocumentFragment: Fragment() {
         binding.documentView.settings.apply {
             setSupportZoom(true)
             builtInZoomControls = true
-            displayZoomControls = true
+            displayZoomControls = false
+            useWideViewPort = true
             @SuppressLint("SetJavaScriptEnabled")
             javaScriptEnabled = true
             allowContentAccess = true
