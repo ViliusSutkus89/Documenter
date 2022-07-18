@@ -19,7 +19,7 @@
         tools:listitem="@layout/list_item_document" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/landing_open_fab"
+        android:id="@+id/open_button"
         app:srcCompat="@drawable/ic_folder_open"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -77,7 +77,7 @@ class HomeFragment: Fragment() {
             adapter.submitList(documentList)
         }
 
-        binding.landingOpenFab.setOnClickListener {
+        binding.openButton.setOnClickListener {
             openDocument.launch(documentViewModel.supportedMimeTypes)
         }
     }
