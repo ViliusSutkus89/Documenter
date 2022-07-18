@@ -19,6 +19,7 @@
 
 package com.viliussutkus89.documenter.ui
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -36,17 +37,19 @@ class HomeFragment: Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val documentViewModel: HomeViewModel by viewModels {
+    private val homeViewModel: HomeViewModel by viewModels {
         val app = requireActivity().application as DocumenterApplication
         HomeViewModel.Factory(app, app.documentDatabase.documentDao())
     }
 
     private val openDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
-        it?.let { uri: Uri ->
-            (requireActivity() as MainActivity).incrementIdlingResource()
-            documentViewModel.openDocument(uri).observe(viewLifecycleOwner) { documentId ->
-                findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(documentId))
-            }
+        it?.let { openUri(it) }
+    }
+
+    private fun openUri(uri: Uri) {
+        (requireActivity() as MainActivity).incrementIdlingResource()
+        homeViewModel.openDocument(uri).observe(viewLifecycleOwner) { documentId ->
+            findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(documentId))
         }
     }
 
@@ -54,6 +57,19 @@ class HomeFragment: Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        requireActivity().intent.let { intent ->
+            when (requireActivity().intent.action) {
+                // ACTION_VIEW sends URI in data field
+                Intent.ACTION_VIEW -> intent.data
+                // ACTION_SEND sends URI in parcelable extra
+                Intent.ACTION_SEND -> intent.getParcelableExtra(Intent.EXTRA_STREAM)
+                else -> null
+            }?.let {
+                if (!homeViewModel.intentUriHandlerGate()) {
+                    openUri(it)
+                }
+            }
+        }
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -74,15 +90,15 @@ class HomeFragment: Fragment() {
                 (requireActivity() as MainActivity).incrementIdlingResource()
                 findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(it.id))
             },
-            removeListener = { documentViewModel.removeDocument(it) }
+            removeListener = { homeViewModel.removeDocument(it) }
         )
         binding.recyclerView.adapter = adapter
-        documentViewModel.documents.observe(viewLifecycleOwner) { documentList ->
+        homeViewModel.documents.observe(viewLifecycleOwner) { documentList ->
             adapter.submitList(documentList)
         }
 
         binding.openButton.setOnClickListener {
-            openDocument.launch(documentViewModel.supportedMimeTypes)
+            openDocument.launch(homeViewModel.supportedMimeTypes)
         }
     }
 }

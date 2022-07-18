@@ -20,6 +20,7 @@
 package com.viliussutkus89.documenter.viewmodel
 
 import android.app.Application
+import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.*
@@ -51,6 +52,14 @@ class HomeViewModel(application: Application, private val documentDao: DocumentD
     val supportedMimeTypes = pdf2htmlEXWorker.SUPPORTED_MIME_TYPES + wvWareWorker.SUPPORTED_MIME_TYPES
     val documents: LiveData<List<Document>> = documentDao.getDocuments().asLiveData()
 
+    // handle uri incoming through Intent only once
+    private var intentUriHandled = false
+    fun intentUriHandlerGate(): Boolean {
+        val prev = intentUriHandled
+        intentUriHandled = true
+        return prev
+    }
+
     fun removeDocument(document: Document) {
         viewModelScope.launch(Dispatchers.IO) {
             WorkManager.getInstance(app).cancelUniqueWork("document-${document.id}")
@@ -68,11 +77,11 @@ class HomeViewModel(application: Application, private val documentDao: DocumentD
                 sourceUri = uri
             ))
             val document = documentDao.getDocument(documentId)
+            result.postValue(documentId)
 
             document.getCachedDir(appCacheDir = app.cacheDir).mkdirs()
             document.getFilesDir(appFilesDir = app.filesDir).mkdirs()
 
-            result.postValue(documentId)
 
             val saveToCacheWorkRequest = OneTimeWorkRequestBuilder<SaveToCacheWorker>()
                 .setInputData(workDataOf(SaveToCacheWorker.INPUT_KEY_DOCUMENT_ID to documentId))
