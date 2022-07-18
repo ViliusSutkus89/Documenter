@@ -141,6 +141,8 @@ jobs:
 
             test ! -f sorry_but_tests_are_failing
 
+      - run: mv app/build/outputs/androidTest-results/connected testResults/ || true
+
       - uses: actions/upload-artifact@v3
         if: always()
         with:
