@@ -27,7 +27,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.viliussutkus89.documenter.R
 
@@ -38,7 +37,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        idlingResourceDelegate.isInitialized()
         super.onCreate(savedInstanceState)
         setupActionBarWithNavController(navController)
     }
