@@ -45,7 +45,7 @@ class DocumentListAdapter(
                 if (State.Converted == doc.state) {
                     thumbnail.setImageURI(doc.getScreenshotFile(appCacheDir).toUri())
                 } else {
-                    thumbnail.setImageResource(R.drawable.loading_animation)
+                    thumbnail.setImageResource(R.drawable.loading_img)
                 }
                 thumbnail.setOnClickListener {
                     openListener(doc)

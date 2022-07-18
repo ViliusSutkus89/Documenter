@@ -23,7 +23,7 @@
                 android:id="@+id/thumbnail"
                 android:layout_width="match_parent"
                 android:layout_height="194dp"
-                app:srcCompat="@drawable/loading_animation"
+                app:srcCompat="@drawable/loading_img"
                 android:scaleType="centerCrop" />
             <LinearLayout
                 android:layout_width="match_parent"
