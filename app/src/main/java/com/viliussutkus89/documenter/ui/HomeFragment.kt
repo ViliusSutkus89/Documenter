@@ -43,6 +43,7 @@ class HomeFragment: Fragment() {
 
     private val openDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
         it?.let { uri: Uri ->
+            (requireActivity() as MainActivity).incrementIdlingResource()
             documentViewModel.openDocument(uri).observe(viewLifecycleOwner) { documentId ->
                 findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(documentId))
             }
@@ -69,7 +70,10 @@ class HomeFragment: Fragment() {
         }
         val adapter = DocumentListAdapter(
             appCacheDir = requireContext().cacheDir,
-            openListener = { findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(it.id)) },
+            openListener = {
+                (requireActivity() as MainActivity).incrementIdlingResource()
+                findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(it.id))
+            },
             removeListener = { documentViewModel.removeDocument(it) }
         )
         binding.recyclerView.adapter = adapter

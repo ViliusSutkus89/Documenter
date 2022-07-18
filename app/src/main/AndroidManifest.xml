@@ -52,6 +52,17 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+
+        <!-- FileProvider required only for testing -->
+        <provider
+            android:name=".InstrumentedTestsFileProvider"
+            android:authorities="${applicationId}.instrumentedTestsProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/test_provider_paths"/>
+        </provider>
     </application>
 
 </manifest>

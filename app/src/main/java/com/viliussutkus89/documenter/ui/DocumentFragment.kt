@@ -26,6 +26,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -84,6 +86,14 @@ class DocumentFragment: Fragment() {
                 document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
                     val convertedUri = FileProvider.getUriForFile(requireContext(), requireContext().packageName + ".provider", htmlFile)
                     binding.documentView.loadUrl(convertedUri.toString())
+                }
+            }
+
+            if ((requireActivity() as MainActivity).isIdlingResourceInitialized()) {
+                binding.documentView.webViewClient = object : WebViewClient() {
+                    override fun onPageFinished(view: WebView?, url: String?) {
+                        (requireActivity() as MainActivity).decrementIdlingResource()
+                    }
                 }
             }
         }

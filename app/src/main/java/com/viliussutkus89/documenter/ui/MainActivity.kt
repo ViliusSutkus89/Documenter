@@ -22,11 +22,13 @@ package com.viliussutkus89.documenter.ui
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.test.espresso.IdlingResource
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.viliussutkus89.documenter.R
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -36,6 +38,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        idlingResourceDelegate.isInitialized()
         super.onCreate(savedInstanceState)
         setupActionBarWithNavController(navController)
     }
@@ -56,6 +59,26 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private val idlingResourceDelegate = lazy {
+        CountingIdlingResource("${javaClass.name}.idlingResource")
+    }
+
+    val idlingResource by idlingResourceDelegate
+
+    internal fun isIdlingResourceInitialized() = idlingResourceDelegate.isInitialized()
+
+    internal fun incrementIdlingResource() {
+        if (idlingResourceDelegate.isInitialized()) {
+            idlingResource.increment()
+        }
+    }
+
+    internal fun decrementIdlingResource() {
+        if (idlingResourceDelegate.isInitialized()) {
+            idlingResource.decrement()
         }
     }
 }
