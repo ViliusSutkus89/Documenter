@@ -50,7 +50,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/document_open"
                     style="?attr/borderlessButtonStyle"
-                    app:layout_constraintLeft_toLeftOf="parent" />
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
                 <ImageView
                     android:id="@+id/removeButton"
@@ -59,7 +60,8 @@
                     android:contentDescription="@string/document_remove"
                     app:srcCompat="@drawable/ic_baseline_clear_24"
                     style="?attr/borderlessButtonStyle"
-                    app:layout_constraintRight_toRightOf="parent" />
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
