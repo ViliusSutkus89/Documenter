@@ -66,6 +66,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         CountingIdlingResource("${javaClass.name}.idlingResource")
     }
 
+    @VisibleForTesting
     val idlingResource by idlingResourceDelegate
 
     internal fun isIdlingResourceInitialized() = idlingResourceDelegate.isInitialized()
