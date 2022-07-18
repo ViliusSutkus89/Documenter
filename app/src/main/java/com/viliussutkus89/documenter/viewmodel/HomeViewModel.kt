@@ -32,6 +32,7 @@ import com.viliussutkus89.documenter.background.pdf2htmlEXWorker
 import com.viliussutkus89.documenter.background.wvWareWorker
 import com.viliussutkus89.documenter.model.*
 import com.viliussutkus89.documenter.utils.getFilename
+import com.viliussutkus89.documenter.utils.getMimeType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -82,14 +83,13 @@ class HomeViewModel(application: Application, private val documentDao: DocumentD
             document.getCachedDir(appCacheDir = app.cacheDir).mkdirs()
             document.getFilesDir(appFilesDir = app.filesDir).mkdirs()
 
-
             val saveToCacheWorkRequest = OneTimeWorkRequestBuilder<SaveToCacheWorker>()
                 .setInputData(workDataOf(SaveToCacheWorker.INPUT_KEY_DOCUMENT_ID to documentId))
                 .build()
             var continuation = WorkManager.getInstance(app)
                 .beginUniqueWork("document-${documentId}", ExistingWorkPolicy.REPLACE, saveToCacheWorkRequest)
 
-            val type = app.contentResolver.getType(uri)
+            val type = uri.getMimeType(app.contentResolver)
             if (pdf2htmlEXWorker.SUPPORTED_MIME_TYPES.contains(type)) {
                 continuation = continuation
                     .then(OneTimeWorkRequestBuilder<pdf2htmlEXWorker>()
