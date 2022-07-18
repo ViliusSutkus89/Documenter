@@ -136,13 +136,11 @@ jobs:
             adb shell screencap /data/local/tmp/afterTests.png
             adb pull /data/local/tmp/afterTests.png testResults/screenshots/
 
-            mv lib/build/reports/androidTests/connected testResults/
-            mv lib/build/outputs/androidTest-results testResults/
+            mv app/build/reports/androidTests/connected testResults/
+            mv app/build/outputs/androidTest-results testResults/
 
 # Temporary ignore failed tests, to cache AVD
 #            test ! -f sorry_but_tests_are_failing
-
-      - run: mv app/build/outputs/androidTest-results/connected testResults/ || true
 
       - uses: actions/upload-artifact@v3
         if: always()
