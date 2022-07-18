@@ -30,7 +30,7 @@ import com.viliussutkus89.documenter.background.SaveToCacheWorker
 import com.viliussutkus89.documenter.background.pdf2htmlEXWorker
 import com.viliussutkus89.documenter.background.wvWareWorker
 import com.viliussutkus89.documenter.model.*
-import com.viliussutkus89.documenter.utils.GetFileName
+import com.viliussutkus89.documenter.utils.getFilename
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -64,7 +64,7 @@ class HomeViewModel(application: Application, private val documentDao: DocumentD
         val result = MutableLiveData<Long>()
         viewModelScope.launch(Dispatchers.IO) {
             val documentId = documentDao.insert(Document(
-                filename = GetFileName.FromUri(app.contentResolver, uri),
+                filename = uri.getFilename(app.contentResolver) ?: "Unknown file",
                 sourceUri = uri
             ))
             val document = documentDao.getDocument(documentId)
