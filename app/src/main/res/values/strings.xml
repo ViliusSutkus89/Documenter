@@ -26,7 +26,6 @@
     </string>
     <string name="show_licenses">Show licenses</string>
 
-    <string name="webview_missing_label">WebView missing</string>
     <string name="webview_prompt">Documenter requires \"Android System WebView\"</string>
     <string name="webview_install">Install</string>
     <string name="webview_no_marketplace">Failed to open app installer</string>
