@@ -114,8 +114,7 @@ jobs:
             mv app/build/reports/androidTests/connected testResults/
             mv app/build/outputs/androidTest-results testResults/
 
-# Temporary ignore failed tests, to cache AVD
-#            test ! -f sorry_but_tests_are_failing
+            test ! -f sorry_but_tests_are_failing
 
       - uses: actions/upload-artifact@v3
         if: always()
