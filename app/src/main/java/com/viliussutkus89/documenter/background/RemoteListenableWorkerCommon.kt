@@ -63,7 +63,7 @@ abstract class RemoteListenableWorkerCommon(ctx: Context, params: WorkerParamete
             val notification: Notification = NotificationCompat.Builder(applicationContext, channelId)
                 .setContentTitle(title)
                 .setTicker(title)
-                .setSmallIcon(R.drawable.ic_folder_open)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
                 .setOngoing(true)
                 .build()
 
