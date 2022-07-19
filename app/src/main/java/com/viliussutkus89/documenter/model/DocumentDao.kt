@@ -47,4 +47,7 @@ interface DocumentDao {
 
     @Query("UPDATE `document` SET `last_accessed` = :lastAccessed WHERE `id` = :id")
     fun updateLastAccessed(id: Long, lastAccessed: Long)
+
+    @Query("UPDATE `document` SET `state` = :state WHERE `id` = :id")
+    fun updateState(id: Long, state: State)
 }

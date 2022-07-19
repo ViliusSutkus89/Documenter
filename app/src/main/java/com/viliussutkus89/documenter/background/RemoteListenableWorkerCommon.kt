@@ -81,8 +81,8 @@ abstract class RemoteListenableWorkerCommon(ctx: Context, params: WorkerParamete
             if (documentId == (-1).toLong()) {
                 return@getFuture completer.set(Result.failure())
             }
-            var document = documentDao.getDocument(documentId).copy(state = State.Converting)
-            documentDao.update(document)
+            var document = documentDao.getDocument(documentId)
+            documentDao.updateState(documentId, State.Converting)
 
             val cachedFile = document.getCachedSourceFile(appCacheDir = applicationContext.cacheDir)
 
