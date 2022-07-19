@@ -62,7 +62,7 @@ abstract class RemoteListenableWorkerCommon(ctx: Context, params: WorkerParamete
             return NotificationCompat.Builder(context, channelId)
                 .setContentTitle(title)
                 .setTicker(title)
-                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setSmallIcon(R.drawable.ic_photo_filter)
                 .setOngoing(true)
                 .build()
         }
