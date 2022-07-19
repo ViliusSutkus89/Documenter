@@ -40,42 +40,44 @@ import java.io.File
 abstract class RemoteListenableWorkerCommon(ctx: Context, params: WorkerParameters): RemoteListenableWorker(ctx, params) {
     companion object {
         const val INPUT_KEY_DOCUMENT_ID = "key_id"
-    }
 
-    private val documentId = inputData.getLong(INPUT_KEY_DOCUMENT_ID, -1)
-    private val documentDao by lazy { DocumentDatabase.getDatabase(applicationContext).documentDao() }
+        @RequiresApi(Build.VERSION_CODES.O)
+        private fun createNotificationChannel(context: Context) {
+            val id: String = context.getString(R.string.converter_worker_notification_channel_id)
+            val name: CharSequence = context.getString(R.string.converter_worker_notification_channel_name)
+            val description: String = context.getString(R.string.converter_worker_notification_channel_description)
+            val channel = android.app.NotificationChannel(id, name, NotificationManager.IMPORTANCE_LOW)
+            channel.description = description
+            context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotificationChannel() {
-        val ctx = applicationContext
-        val id: String = ctx.getString(R.string.converter_worker_notification_channel_id)
-        val name: CharSequence = ctx.getString(R.string.converter_worker_notification_channel_name)
-        val description: String = ctx.getString(R.string.converter_worker_notification_channel_description)
-        val channel = android.app.NotificationChannel(id, name, NotificationManager.IMPORTANCE_LOW)
-        channel.description = description
-        ctx.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
-    }
-
-    override fun getForegroundInfoAsync(): ListenableFuture<ForegroundInfo?> {
-        return CallbackToFutureAdapter.getFuture { completer: CallbackToFutureAdapter.Completer<ForegroundInfo?> ->
+        fun createNotification(context: Context): Notification {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createNotificationChannel()
+                createNotificationChannel(context)
             }
 
-            val channelId = applicationContext.getString(R.string.converter_worker_notification_channel_id)
-            val title = applicationContext.getString(R.string.converter_worker_notification_title)
+            val channelId = context.getString(R.string.converter_worker_notification_channel_id)
+            val title = context.getString(R.string.converter_worker_notification_title)
 
-            val notification: Notification = NotificationCompat.Builder(applicationContext, channelId)
+            return NotificationCompat.Builder(context, channelId)
                 .setContentTitle(title)
                 .setTicker(title)
                 .setSmallIcon(R.mipmap.ic_launcher_round)
                 .setOngoing(true)
                 .build()
+        }
+    }
+
+    private val documentId = inputData.getLong(INPUT_KEY_DOCUMENT_ID, -1)
+    private val documentDao by lazy { DocumentDatabase.getDatabase(applicationContext).documentDao() }
+
+    override fun getForegroundInfoAsync(): ListenableFuture<ForegroundInfo?> {
+        return CallbackToFutureAdapter.getFuture { completer: CallbackToFutureAdapter.Completer<ForegroundInfo?> ->
+            val notification = createNotification(applicationContext)
 
             // Use WorkRequest ID to generate Notification ID.
             // Each Notification ID must be unique to create a new notification for each work request.
-            val notificationId = id.hashCode()
-            completer.set(ForegroundInfo(notificationId, notification))
+            completer.set(ForegroundInfo(id.hashCode(), notification))
         }
     }
 
