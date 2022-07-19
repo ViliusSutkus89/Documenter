@@ -69,8 +69,8 @@ abstract class RemoteListenableWorkerCommon(ctx: Context, params: WorkerParamete
 
             // Use WorkRequest ID to generate Notification ID.
             // Each Notification ID must be unique to create a new notification for each work request.
-            val notification_id = id.hashCode()
-            completer.set(ForegroundInfo(notification_id, notification))
+            val notificationId = id.hashCode()
+            completer.set(ForegroundInfo(notificationId, notification))
         }
     }
 
