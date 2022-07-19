@@ -22,6 +22,7 @@ package com.viliussutkus89.documenter
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
+import android.os.Build
 import androidx.core.content.FileProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
@@ -38,8 +39,10 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.viliussutkus89.android.assetextractor.AssetExtractor
 import com.viliussutkus89.documenter.ui.MainActivity
 import org.junit.*
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import org.junit.runners.model.Statement
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -79,13 +82,36 @@ class InstrumentedTest {
     @get:Rule
     val screenshotFailedTestRule = ScreenshotFailedTestRule(InstrumentationRegistry.getInstrumentation())
 
+    // https://github.com/android/android-test/issues/1433
+    private val activityScenarioTestRuleWorkaroundNeeded = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
+
+    @get:Rule
+    val activityTestRule: TestRule = if (activityScenarioTestRuleWorkaroundNeeded) {
+        @Suppress("DEPRECATION")
+        androidx.test.rule.ActivityTestRule(MainActivity::class.java)
+    } else {
+        // Empty TestRule
+        TestRule { _, _ ->
+            object: Statement() {
+                override fun evaluate() { }
+            }
+        }
+    }
+
     @Before
     fun setUp() {
-        ActivityScenario.launch(MainActivity::class.java).onActivity { activity ->
+        Intents.init()
+        if (activityScenarioTestRuleWorkaroundNeeded) {
+            @Suppress("DEPRECATION", "UNCHECKED_CAST")
+            val activity = (activityTestRule as androidx.test.rule.ActivityTestRule<MainActivity>).activity
             idlingResource = activity.idlingResource
             IdlingRegistry.getInstance().register(idlingResource)
+        } else {
+            ActivityScenario.launch(MainActivity::class.java).onActivity { activity ->
+                idlingResource = activity.idlingResource
+                IdlingRegistry.getInstance().register(idlingResource)
+            }
         }
-        Intents.init()
     }
 
     @After
