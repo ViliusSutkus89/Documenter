@@ -19,11 +19,11 @@
 
 package com.viliussutkus89.documenter
 
-import android.app.Application
+import androidx.multidex.MultiDexApplication
 import androidx.work.Configuration
 import com.viliussutkus89.documenter.model.DocumentDatabase
 
-class DocumenterApplication: Application(), Configuration.Provider {
+class DocumenterApplication: MultiDexApplication(), Configuration.Provider {
     val documentDatabase: DocumentDatabase by lazy {
         DocumentDatabase.getDatabase(this)
     }
