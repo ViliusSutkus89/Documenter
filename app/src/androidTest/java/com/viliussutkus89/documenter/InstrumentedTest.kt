@@ -25,6 +25,7 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.action.ViewActions.click
@@ -40,6 +41,7 @@ import org.junit.*
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 @LargeTest
 @RunWith(Parameterized::class)
@@ -50,6 +52,12 @@ class InstrumentedTest {
     private var idlingResource: IdlingResource? = null
 
     companion object {
+        @BeforeClass @JvmStatic
+        fun setIdlingTimeout() {
+            IdlingPolicies.setMasterPolicyTimeout(5, TimeUnit.MINUTES)
+            IdlingPolicies.setIdlingResourceTimeout(5, TimeUnit.MINUTES)
+        }
+
         @BeforeClass @JvmStatic
         fun extractPDFs() {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
