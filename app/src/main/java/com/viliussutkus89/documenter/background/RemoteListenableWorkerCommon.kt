@@ -20,10 +20,10 @@
 package com.viliussutkus89.documenter.background
 
 import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.app.NotificationCompat
 import androidx.work.ForegroundInfo
@@ -45,20 +45,25 @@ abstract class RemoteListenableWorkerCommon(ctx: Context, params: WorkerParamete
     private val documentId = inputData.getLong(INPUT_KEY_DOCUMENT_ID, -1)
     private val documentDao by lazy { DocumentDatabase.getDatabase(applicationContext).documentDao() }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationChannel() {
+        val ctx = applicationContext
+        val id: String = ctx.getString(R.string.converter_worker_notification_channel_id)
+        val name: CharSequence = ctx.getString(R.string.converter_worker_notification_channel_name)
+        val description: String = ctx.getString(R.string.converter_worker_notification_channel_description)
+        val channel = android.app.NotificationChannel(id, name, NotificationManager.IMPORTANCE_LOW)
+        channel.description = description
+        ctx.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+    }
+
     override fun getForegroundInfoAsync(): ListenableFuture<ForegroundInfo?> {
         return CallbackToFutureAdapter.getFuture { completer: CallbackToFutureAdapter.Completer<ForegroundInfo?> ->
-            val ctx = applicationContext
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val id: String = ctx.getString(R.string.converter_worker_notification_channel_id)
-                val name: CharSequence = ctx.getString(R.string.converter_worker_notification_channel_name)
-                val description: String = ctx.getString(R.string.converter_worker_notification_channel_description)
-                val channel = NotificationChannel(id, name, NotificationManager.IMPORTANCE_LOW)
-                channel.description = description
-                ctx.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+                createNotificationChannel()
             }
 
-            val channelId = ctx.getString(R.string.converter_worker_notification_channel_id)
-            val title = ctx.getString(R.string.converter_worker_notification_title)
+            val channelId = applicationContext.getString(R.string.converter_worker_notification_channel_id)
+            val title = applicationContext.getString(R.string.converter_worker_notification_title)
 
             val notification: Notification = NotificationCompat.Builder(applicationContext, channelId)
                 .setContentTitle(title)
