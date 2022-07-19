@@ -49,7 +49,7 @@ class InstrumentedTest {
     @Parameterized.Parameter
     lateinit var pdfFile: File
 
-    private var idlingResource: IdlingResource? = null
+    private lateinit var idlingResource: IdlingResource
 
     companion object {
         @BeforeClass @JvmStatic
@@ -91,7 +91,7 @@ class InstrumentedTest {
     @After
     fun tearDown() {
         Intents.release()
-        idlingResource?.let { IdlingRegistry.getInstance().unregister(idlingResource) }
+        IdlingRegistry.getInstance().unregister(idlingResource)
     }
 
     @Test
