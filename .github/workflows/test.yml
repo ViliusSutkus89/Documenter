@@ -100,6 +100,7 @@ jobs:
           disk-size: 8G
           script: |
             mkdir -p testResults/screenshots
+            adb logcat -c
             adb logcat > testResults/logcat.txt &
 
             adb shell screencap /data/local/tmp/beforeTests.png
