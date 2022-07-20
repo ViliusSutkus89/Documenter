@@ -56,8 +56,8 @@ class InstrumentedTest {
     companion object {
         @BeforeClass @JvmStatic
         fun setIdlingTimeout() {
-            IdlingPolicies.setMasterPolicyTimeout(5, TimeUnit.MINUTES)
-            IdlingPolicies.setIdlingResourceTimeout(5, TimeUnit.MINUTES)
+            IdlingPolicies.setMasterPolicyTimeout(10, TimeUnit.MINUTES)
+            IdlingPolicies.setIdlingResourceTimeout(10, TimeUnit.MINUTES)
         }
 
         @BeforeClass @JvmStatic
