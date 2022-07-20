@@ -20,6 +20,8 @@
 package com.viliussutkus89.documenter.ui
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.net.Uri
@@ -34,6 +36,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.snackbar.Snackbar
 import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.databinding.FragmentDocumentBinding
@@ -136,6 +139,26 @@ class DocumentFragment: Fragment() {
                                     viewModel.saveDocument(it, requireContext())
                                 }
                             }.launch(document.convertedFilename)
+                        }
+                        true
+                    }
+                    R.id.share -> {
+                        viewModel.document.observeOnce(viewLifecycleOwner) { document ->
+                            document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
+                                val convertedUri = FileProvider.getUriForFile(requireContext(), requireContext().packageName + ".provider", htmlFile)
+                                binding.documentView.loadUrl(convertedUri.toString())
+
+                                try {
+                                    startActivity(Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/html"
+                                        putExtra(Intent.EXTRA_STREAM, convertedUri)
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    })
+                                } catch (e: ActivityNotFoundException) {
+                                    e.printStackTrace()
+                                    Snackbar.make(view, R.string.error_share_failed, Snackbar.LENGTH_LONG).show()
+                                }
+                            }
                         }
                         true
                     }

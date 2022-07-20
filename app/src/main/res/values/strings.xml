@@ -47,4 +47,6 @@
     <string name="converter_worker_notification_channel_description">Notification channel used to notify user about currently active pdf/doc conversion process</string>
     <string name="menu_about">About</string>
     <string name="menu_save">Save</string>
+    <string name="menu_share">Share</string>
+    <string name="error_share_failed">Failed to share converted document!</string>
 </resources>
