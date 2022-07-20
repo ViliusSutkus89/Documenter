@@ -71,15 +71,15 @@ class HomeViewModel(application: Application, private val documentDao: DocumentD
         }
     }
 
-    fun openDocument(uri: Uri): LiveData<Long> {
-        val result = MutableLiveData<Long>()
+    fun openDocument(uri: Uri): LiveData<Document> {
+        val result = MutableLiveData<Document>()
         viewModelScope.launch(Dispatchers.IO) {
             val documentId = documentDao.insert(Document(
                 filename = uri.getFilename(app.contentResolver) ?: "Unknown file",
                 sourceUri = uri
             ))
             val document = documentDao.getDocument(documentId)
-            result.postValue(documentId)
+            result.postValue(document)
 
             document.getCachedDir(appCacheDir = app.cacheDir).mkdirs()
             document.getFilesDir(appFilesDir = app.filesDir).mkdirs()

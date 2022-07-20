@@ -48,8 +48,8 @@ class HomeFragment: Fragment() {
 
     private fun openUri(uri: Uri) {
         (requireActivity() as MainActivity).incrementIdlingResource()
-        homeViewModel.openDocument(uri).observe(viewLifecycleOwner) { documentId ->
-            findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(documentId))
+        homeViewModel.openDocument(uri).observe(viewLifecycleOwner) { document ->
+            findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(document.id, document.filename))
         }
     }
 
@@ -88,7 +88,7 @@ class HomeFragment: Fragment() {
             appCacheDir = requireContext().cacheDir,
             openListener = {
                 (requireActivity() as MainActivity).incrementIdlingResource()
-                findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(it.id))
+                findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(it.id, it.filename))
             },
             removeListener = { homeViewModel.removeDocument(it) }
         )

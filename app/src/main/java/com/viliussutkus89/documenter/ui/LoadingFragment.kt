@@ -42,7 +42,7 @@ class LoadingFragment: Fragment(R.layout.fragment_loading) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel.document.observe(viewLifecycleOwner) { document ->
             if (State.Converted == document.state) {
-                val action = LoadingFragmentDirections.actionLoadingFragmentToDocumentFragment(args.documentId)
+                val action = LoadingFragmentDirections.actionLoadingFragmentToDocumentFragment(document.id, document.filename)
                 findNavController().navigate(action)
             }
 
