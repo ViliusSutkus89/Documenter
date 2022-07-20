@@ -22,17 +22,20 @@ package com.viliussutkus89.documenter.ui
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import com.viliussutkus89.documenter.DocumenterApplication
+import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.databinding.FragmentDocumentBinding
 import com.viliussutkus89.documenter.model.getConvertedHtmlFile
 import com.viliussutkus89.documenter.utils.observeOnce
@@ -116,5 +119,29 @@ class DocumentFragment: Fragment() {
         val documentViewBundle = Bundle()
         binding.documentView.saveState(documentViewBundle)
         outState.putBundle(BUNDLE_KEY_DOCUMENT_VIEW, documentViewBundle)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        requireActivity().addMenuProvider(object: MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.document_menu, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when(menuItem.itemId) {
+                    R.id.save -> {
+                        viewModel.document.observeOnce(viewLifecycleOwner) { document ->
+                            registerForActivityResult<String, Uri>(ActivityResultContracts.CreateDocument("text/html")) {
+                                it?.let {
+                                    viewModel.saveDocument(it, requireContext())
+                                }
+                            }.launch(document.convertedFilename)
+                        }
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 }

@@ -19,12 +19,22 @@
 
 package com.viliussutkus89.documenter.viewmodel
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import com.viliussutkus89.documenter.background.SaveWorker
 import com.viliussutkus89.documenter.model.DocumentDao
+import com.viliussutkus89.documenter.model.DocumentScoped_Filename_ConvertedFilename
+import com.viliussutkus89.documenter.model.getConvertedHtmlFile
 import com.viliussutkus89.documenter.model.getScreenshotFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,5 +69,14 @@ class DocumentViewModel(private val documentId: Long, private val documentDao: D
             }
             documentDao.updateLastAccessed(documentId, Date().time)
         }
+    }
+
+    fun saveDocument(destinationUri: Uri, context: Context) {
+        val convertedFile = (document.value as DocumentScoped_Filename_ConvertedFilename).getConvertedHtmlFile(appFilesDir = context.filesDir)!!
+        WorkManager.getInstance(context).beginUniqueWork("saveDocument-${documentId}", ExistingWorkPolicy.REPLACE,
+            OneTimeWorkRequestBuilder<SaveWorker>().setInputData(workDataOf(
+                SaveWorker.INPUT_KEY_INPUT_URI to convertedFile.toUri().toString(),
+                SaveWorker.INPUT_KEY_OUTPUT_URI to destinationUri.toString()
+            )).build()).enqueue()
     }
 }
