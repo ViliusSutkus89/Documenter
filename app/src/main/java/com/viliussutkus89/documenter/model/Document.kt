@@ -54,16 +54,7 @@ data class Document(
     @ColumnInfo(name = "last_accessed")
     val lastAccessed: Long = Date().time,
 
-    val state: State = State.Init,
-
-    @ColumnInfo(name = "scroll_selector")
-    val scrollSelector: String? = null,
-
-    @ColumnInfo(name = "scroll_left")
-    val scrollLeft: Int? = null,
-
-    @ColumnInfo(name = "scroll_top")
-    val scrollTop: Int? = null
+    val state: State = State.Init
 )
 
 data class DocumentScoped_Filename_State(
