@@ -23,6 +23,9 @@ android {
 
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
+        // https://github.com/android/android-test/issues/1433
+        // https://issuetracker.google.com/issues/78108767#comment12
+        multiDexKeepProguard file('multidex.pro')
     }
     buildFeatures {
         viewBinding = true
