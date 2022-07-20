@@ -23,6 +23,7 @@ import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
 import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingPolicies
@@ -30,6 +31,7 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.pressBack
+import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -47,7 +49,7 @@ import java.util.concurrent.TimeUnit
 @RunWith(Parameterized::class)
 class InstrumentedTest {
     @Parameterized.Parameter
-    lateinit var pdfFile: File
+    lateinit var testFile: File
 
     private lateinit var idlingResource: IdlingResource
 
@@ -95,10 +97,10 @@ class InstrumentedTest {
     }
 
     @Test
-    fun testAllSuppliedPDFs() {
+    fun testParameterizedFile() {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         val authority = appContext.packageName + ".instrumentedTestsProvider"
-        val uri = FileProvider.getUriForFile(appContext, authority, pdfFile)
+        val uri = FileProvider.getUriForFile(appContext, authority, testFile)
 
         Intents.intending(IntentMatchers.hasAction(Intent.ACTION_OPEN_DOCUMENT)).respondWith(
             Instrumentation.ActivityResult(
@@ -108,6 +110,12 @@ class InstrumentedTest {
         )
 
         onView(withId(R.id.open_button)).perform(click())
+        onView(withId(R.id.documentView)).perform(pressBack())
+
+        // Open previously converted document
+        onView(withId(R.id.recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click())
+        )
         onView(withId(R.id.documentView)).perform(pressBack())
     }
 }
