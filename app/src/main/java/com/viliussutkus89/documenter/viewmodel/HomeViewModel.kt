@@ -27,6 +27,7 @@ import androidx.lifecycle.*
 import androidx.work.*
 import androidx.work.multiprocess.RemoteListenableWorker.ARGUMENT_CLASS_NAME
 import androidx.work.multiprocess.RemoteListenableWorker.ARGUMENT_PACKAGE_NAME
+import com.viliussutkus89.documenter.background.CleanupCachedDocumentWorker
 import com.viliussutkus89.documenter.background.SaveToCacheWorker
 import com.viliussutkus89.documenter.background.pdf2htmlEXWorker
 import com.viliussutkus89.documenter.background.wvWareWorker
@@ -115,6 +116,10 @@ class HomeViewModel(application: Application, private val documentDao: DocumentD
                 documentDao.update(documentDao.getDocument(documentId).copy(state = State.Error))
                 return@launch
             }
+
+            continuation = continuation.then(OneTimeWorkRequestBuilder<SaveToCacheWorker>()
+                .setInputData(workDataOf(CleanupCachedDocumentWorker.INPUT_KEY_DOCUMENT_ID to documentId))
+                .build())
 
             continuation.enqueue()
         }
