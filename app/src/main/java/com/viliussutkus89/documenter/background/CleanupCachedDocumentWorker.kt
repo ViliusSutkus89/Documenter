@@ -20,31 +20,28 @@
 package com.viliussutkus89.documenter.background
 
 import android.content.Context
+import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.viliussutkus89.documenter.model.DocumentDatabase
-import com.viliussutkus89.documenter.model.getCachedSourceFile
+import java.io.File
 import java.io.IOException
 
 class CleanupCachedDocumentWorker(context: Context, params: WorkerParameters): Worker(context, params) {
     companion object {
-        const val INPUT_KEY_DOCUMENT_ID = "key_id"
+        private const val TAG = "WorkerCleanupCachedDocument"
     }
 
-    private val documentId = inputData.getLong(INPUT_KEY_DOCUMENT_ID, -1)
-    private val documentDao by lazy { DocumentDatabase.getDatabase(applicationContext).documentDao() }
+    private val cachedFile = File(inputData.getString(DATA_KEY_CACHED_FILE)
+        ?: throw IllegalArgumentException("DATA_KEY_CACHED_FILE is null"))
 
     override fun doWork(): Result {
-        if (documentId == (-1).toLong()) {
-            return Result.failure()
-        }
-        val document = documentDao.getDocument(documentId)
-        val outputFile = document.getCachedSourceFile(appCacheDir = applicationContext.cacheDir)
-        try {
-            outputFile.delete()
+        return try {
+            cachedFile.delete()
+            Result.success()
         } catch (e: IOException) {
+            Log.e(TAG, "Failed to cleanup cached document")
             e.printStackTrace()
+            Result.failure()
         }
-        return Result.success()
     }
 }

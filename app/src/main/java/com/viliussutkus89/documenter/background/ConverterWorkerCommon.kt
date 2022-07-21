@@ -1,5 +1,5 @@
 /*
- * RemoteListenableWorkerCommon.kt
+ * ConverterWorkerCommon.kt
  *
  * Copyright (C) 2022 ViliusSutkus89.com
  *
@@ -31,16 +31,10 @@ import androidx.work.WorkerParameters
 import androidx.work.multiprocess.RemoteListenableWorker
 import com.google.common.util.concurrent.ListenableFuture
 import com.viliussutkus89.documenter.R
-import com.viliussutkus89.documenter.model.DocumentDatabase
-import com.viliussutkus89.documenter.model.State
-import com.viliussutkus89.documenter.model.getCachedSourceFile
-import com.viliussutkus89.documenter.model.getConvertedHtmlFile
 import java.io.File
 
-abstract class RemoteListenableWorkerCommon(ctx: Context, params: WorkerParameters): RemoteListenableWorker(ctx, params) {
+abstract class ConverterWorkerCommon(ctx: Context, params: WorkerParameters): RemoteListenableWorker(ctx, params) {
     companion object {
-        const val INPUT_KEY_DOCUMENT_ID = "key_id"
-
         @RequiresApi(Build.VERSION_CODES.O)
         private fun createNotificationChannel(context: Context) {
             val id: String = context.getString(R.string.converter_worker_notification_channel_id)
@@ -68,36 +62,28 @@ abstract class RemoteListenableWorkerCommon(ctx: Context, params: WorkerParamete
         }
     }
 
-    private val documentId = inputData.getLong(INPUT_KEY_DOCUMENT_ID, -1)
-    private val documentDao by lazy { DocumentDatabase.getDatabase(applicationContext).documentDao() }
-
     override fun getForegroundInfoAsync(): ListenableFuture<ForegroundInfo?> {
         return CallbackToFutureAdapter.getFuture { completer: CallbackToFutureAdapter.Completer<ForegroundInfo?> ->
-            val notification = createNotification(applicationContext)
-
-            // Use WorkRequest ID to generate Notification ID.
-            // Each Notification ID must be unique to create a new notification for each work request.
-            completer.set(ForegroundInfo(id.hashCode(), notification))
+            completer.set(ForegroundInfo(id.hashCode(), createNotification(applicationContext)))
         }
     }
+
+    private val cachedFile = File(inputData.getString(DATA_KEY_CACHED_FILE)
+        ?: throw IllegalArgumentException("DATA_KEY_CACHED_FILE is null"))
+
+    private val convertedFile = File(inputData.getString(DATA_KEY_CONVERTED_FILE)
+        ?: throw IllegalArgumentException("DATA_KEY_CONVERTED_FILE is null"))
 
     abstract fun doWorkSync(inputFile: File): File?
 
     override fun startRemoteWork(): ListenableFuture<Result> {
         return CallbackToFutureAdapter.getFuture { completer: CallbackToFutureAdapter.Completer<Result> ->
-            if (documentId == (-1).toLong()) {
+
+            doWorkSync(cachedFile)?.run {
+                renameTo(convertedFile)
+            } ?: run {
                 return@getFuture completer.set(Result.failure())
             }
-            var document = documentDao.getDocument(documentId)
-            documentDao.updateState(documentId, State.Converting)
-
-            val cachedFile = document.getCachedSourceFile(appCacheDir = applicationContext.cacheDir)
-
-            val convertedFile = doWorkSync(cachedFile) ?: return@getFuture completer.set(Result.failure())
-
-            document = document.copy(convertedFilename = convertedFile.name, state = State.Converted)
-            convertedFile.renameTo(document.getConvertedHtmlFile(appFilesDir = applicationContext.filesDir)!!)
-            documentDao.update(document)
 
             return@getFuture completer.set(Result.success())
         }

@@ -26,10 +26,12 @@ import com.viliussutkus89.android.pdf2htmlex.pdf2htmlEX
 import java.io.File
 import java.io.IOException
 
-class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): RemoteListenableWorkerCommon(ctx, params) {
+class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): ConverterWorkerCommon(ctx, params) {
     class RemoteWorkerService : androidx.work.multiprocess.RemoteWorkerService()
 
     companion object {
+        private const val TAG = "Workerpdf2htmlEX"
+
         // https://filext.com/file-extension/PDF
         val SUPPORTED_MIME_TYPES = arrayOf(
             "application/pdf",
@@ -39,7 +41,8 @@ class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): RemoteListenable
             "text/pdf",
             "text/x-pdf"
         )
-        val INPUT_KEY_DOCUMENT_ID = RemoteListenableWorkerCommon.INPUT_KEY_DOCUMENT_ID
+
+        fun generateConvertedFileName(inputFilename: String): String = inputFilename.removeSuffix(".pdf") + ".html"
     }
 
     override fun doWorkSync(inputFile: File): File? {
@@ -47,8 +50,8 @@ class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): RemoteListenable
             val converter = pdf2htmlEX(applicationContext).setInputPDF(inputFile)
             converter.convert()
         } catch (e: IOException) {
+            Log.e(TAG, "Conversion failed")
             e.printStackTrace()
-            Log.e("pdf2htmlEXWorker", "Conversion failed")
             null
         }
     }

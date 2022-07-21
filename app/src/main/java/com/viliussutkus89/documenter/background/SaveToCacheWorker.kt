@@ -23,41 +23,31 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.viliussutkus89.documenter.model.DocumentDatabase
-import com.viliussutkus89.documenter.model.State
-import com.viliussutkus89.documenter.model.getCachedSourceFile
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
 class SaveToCacheWorker(context: Context, params: WorkerParameters): Worker(context, params) {
     companion object {
-        const val INPUT_KEY_DOCUMENT_ID = "key_id"
+        private const val TAG = "WorkerSaveToCache"
     }
 
-    private val documentId = inputData.getLong(INPUT_KEY_DOCUMENT_ID, -1)
-    private val documentDao by lazy { DocumentDatabase.getDatabase(applicationContext).documentDao() }
+    private val inputUri = Uri.parse(inputData.getString(DATA_KEY_INPUT_URI)
+        ?: throw IllegalArgumentException("DATA_KEY_INPUT_URI is null"))
+
+    private val cachedFile = File(inputData.getString(DATA_KEY_CACHED_FILE)
+        ?: throw IllegalArgumentException("DATA_KEY_CACHED_FILE is null"))
+
     private val cr by lazy { applicationContext.contentResolver }
 
     override fun doWork(): Result {
-        if (documentId == (-1).toLong()) {
-            return Result.failure()
-        }
-        val document = documentDao.getDocument(documentId)
-        documentDao.updateState(documentId, State.Caching)
-
-        val outputFile = document.getCachedSourceFile(appCacheDir = applicationContext.cacheDir)
-        val permissionTook = takePermission(document.sourceUri)
-        val copyResult = copyFromUriToFile(document.sourceUri, outputFile)
-        if (permissionTook) { releasePermission(document.sourceUri) }
-        if (!copyResult) {
-            documentDao.updateState(documentId, State.Error)
-            return Result.failure()
-        }
-        documentDao.updateState(documentId, State.Cached)
-        return Result.success()
+        val permissionTook = takePermission(inputUri)
+        val copyResult = copyFromUriToFile(inputUri, cachedFile)
+        if (permissionTook) { releasePermission(inputUri) }
+        return if (copyResult) { Result.success() } else { Result.failure() }
     }
 
     private fun takePermission(uri: Uri): Boolean {
@@ -83,6 +73,7 @@ class SaveToCacheWorker(context: Context, params: WorkerParameters): Worker(cont
         try {
             cr.openInputStream(inputUri).use { inputStream ->
                 if (null == inputStream) {
+                    Log.e(TAG, "Failed to open input Uri")
                     return false
                 }
                 FileOutputStream(outputFile).use { outputStream ->
@@ -95,6 +86,8 @@ class SaveToCacheWorker(context: Context, params: WorkerParameters): Worker(cont
                 }
             }
         } catch (e: IOException) {
+            Log.e(TAG, "Failed to cache document")
+            e.printStackTrace()
             if (outputFile.exists()) {
                 outputFile.delete()
             }

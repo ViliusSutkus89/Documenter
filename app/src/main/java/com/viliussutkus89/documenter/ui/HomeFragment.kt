@@ -27,11 +27,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.databinding.FragmentHomeBinding
 import com.viliussutkus89.documenter.viewmodel.HomeViewModel
+import com.viliussutkus89.documenter.viewmodel.ConverterViewModel
 
 class HomeFragment: Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -39,7 +41,11 @@ class HomeFragment: Fragment() {
 
     private val homeViewModel: HomeViewModel by viewModels {
         val app = requireActivity().application as DocumenterApplication
-        HomeViewModel.Factory(app, app.documentDatabase.documentDao())
+        HomeViewModel.Factory(app.documentDatabase.documentDao())
+    }
+    private val converterViewModel: ConverterViewModel by activityViewModels {
+        val app = requireActivity().application as DocumenterApplication
+        ConverterViewModel.Factory(app, app.documentDatabase.documentDao())
     }
 
     private val openDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
@@ -48,7 +54,7 @@ class HomeFragment: Fragment() {
 
     private fun openUri(uri: Uri) {
         (requireActivity() as MainActivity).incrementIdlingResource()
-        homeViewModel.openDocument(uri).observe(viewLifecycleOwner) { document ->
+        converterViewModel.convertDocument(uri).observe(viewLifecycleOwner) { document ->
             findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(document.id, document.filename))
         }
     }
@@ -90,7 +96,7 @@ class HomeFragment: Fragment() {
                 (requireActivity() as MainActivity).incrementIdlingResource()
                 findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(it.id, it.filename))
             },
-            removeListener = { homeViewModel.removeDocument(it) }
+            removeListener = { homeViewModel.removeDocument(it, requireContext()) }
         )
         binding.recyclerView.adapter = adapter
         homeViewModel.documents.observe(viewLifecycleOwner) { documentList ->
@@ -98,7 +104,7 @@ class HomeFragment: Fragment() {
         }
 
         binding.openButton.setOnClickListener {
-            openDocument.launch(homeViewModel.supportedMimeTypes)
+            openDocument.launch(ConverterViewModel.supportedMimeTypes)
         }
     }
 }

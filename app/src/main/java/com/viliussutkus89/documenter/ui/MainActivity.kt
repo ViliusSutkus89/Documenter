@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
@@ -30,12 +31,19 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.test.espresso.idling.CountingIdlingResource
+import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.R
+import com.viliussutkus89.documenter.viewmodel.ConverterViewModel
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private val navController: NavController by lazy {
         (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
             .navController
+    }
+
+    private val converterViewModel: ConverterViewModel by viewModels {
+        val app = application as DocumenterApplication
+        ConverterViewModel.Factory(app, app.documentDatabase.documentDao())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +62,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 } else false
             }
         })
+
+        converterViewModel.workWatcher.observe(this) {}
     }
 
     override fun onSupportNavigateUp(): Boolean {

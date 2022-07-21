@@ -26,10 +26,11 @@ import com.viliussutkus89.android.wvware.wvWare
 import java.io.File
 import java.io.IOException
 
-class wvWareWorker(ctx: Context, params: WorkerParameters): RemoteListenableWorkerCommon(ctx, params) {
+class wvWareWorker(ctx: Context, params: WorkerParameters): ConverterWorkerCommon(ctx, params) {
     class RemoteWorkerService : androidx.work.multiprocess.RemoteWorkerService()
 
     companion object {
+        private val TAG = "WorkerwvWare"
         // https://filext.com/file-extension/DOC
         val SUPPORTED_MIME_TYPES = arrayOf(
             "application/msword",
@@ -42,7 +43,8 @@ class wvWareWorker(ctx: Context, params: WorkerParameters): RemoteListenableWork
             "application/x-msw6",
             "application/x-msword"
         )
-        val INPUT_KEY_DOCUMENT_ID = RemoteListenableWorkerCommon.INPUT_KEY_DOCUMENT_ID
+
+        fun generateConvertedFileName(inputFilename: String): String = inputFilename.removeSuffix(".doc") + ".html"
     }
 
     override fun doWorkSync(inputFile: File): File? {
@@ -50,8 +52,8 @@ class wvWareWorker(ctx: Context, params: WorkerParameters): RemoteListenableWork
             val converter = wvWare(applicationContext).setInputDOC(inputFile)
             converter.convertToHTML()
         } catch (e: IOException) {
+            Log.e(TAG, "Conversion failed")
             e.printStackTrace()
-            Log.e("wvWareWorker", "Conversion failed")
             null
         }
     }

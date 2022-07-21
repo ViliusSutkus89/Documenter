@@ -40,7 +40,6 @@ abstract class DocumentDatabase: RoomDatabase() {
                     if (!::INSTANCE.isInitialized) {
                         INSTANCE = Room
                             .databaseBuilder(context.applicationContext, DocumentDatabase::class.java, DB_NAME)
-                            .enableMultiInstanceInvalidation()
                             .build()
                     }
                 }

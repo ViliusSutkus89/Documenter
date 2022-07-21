@@ -33,9 +33,6 @@ interface DocumentDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insert(document: Document): Long
 
-    @Update
-    fun update(document: Document)
-
     @Delete
     fun delete(document: Document)
 
@@ -48,6 +45,12 @@ interface DocumentDao {
     @Query("UPDATE `document` SET `last_accessed` = :lastAccessed WHERE `id` = :id")
     fun updateLastAccessed(id: Long, lastAccessed: Long)
 
-    @Query("UPDATE `document` SET `state` = :state WHERE `id` = :id")
-    fun updateState(id: Long, state: State)
+    @Query("UPDATE `document` SET `state` = :state WHERE `id` = :id AND `state` < :state AND `state` != :internal_errorState")
+    fun progressState(id: Long, state: State, internal_errorState: State = State.Error)
+
+    @Query("UPDATE `document` SET `state` = :internal_errorState WHERE `id` = :id")
+    fun errorState(id: Long, internal_errorState: State = State.Error)
+
+    @Query("UPDATE `document` SET `converted_filename` = :convertedFilename WHERE `id` = :id")
+    fun updateConvertedFilename(id: Long, convertedFilename: String)
 }
