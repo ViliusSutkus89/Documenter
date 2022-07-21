@@ -28,7 +28,7 @@ import java.io.IOException
 
 class CleanupCachedDocumentWorker(context: Context, params: WorkerParameters): Worker(context, params) {
     companion object {
-        private const val TAG = "WorkerCleanupCachedDocument"
+        private const val TAG = "WorkerCleanup"
     }
 
     private val cachedFile = File(inputData.getString(DATA_KEY_CACHED_FILE)
