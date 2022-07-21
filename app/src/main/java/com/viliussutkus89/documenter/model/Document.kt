@@ -41,9 +41,6 @@ data class Document(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
 
-    // example: /sdcard/Downloads/myDocument.pdf
-    val sourceUri: Uri,
-
     // example: myDocument.pdf
     val filename: String,
 

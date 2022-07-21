@@ -95,7 +95,6 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
         viewModelScope.launch(Dispatchers.IO) {
             val documentId = documentDao.insert(Document(
                 filename = uri.getFilename(app.contentResolver) ?: "Unknown file",
-                sourceUri = uri
             ))
             var document = documentDao.getDocument(documentId)
             result.postValue(document)
