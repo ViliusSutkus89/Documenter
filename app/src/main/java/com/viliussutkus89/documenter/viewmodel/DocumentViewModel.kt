@@ -57,17 +57,17 @@ class DocumentViewModel(private val documentId: Long, private val documentDao: D
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            documentDao.updateLastAccessed(documentId, Date().time)
+            documentDao.updateLastAccessed(documentId)
         }
     }
 
-    fun saveBitmap(bitmap: Bitmap, appCacheDir: File) {
+    fun saveThumbnail(bitmap: Bitmap, appCacheDir: File) {
         viewModelScope.launch(Dispatchers.IO) {
             val screenshot = document.value?.getScreenshotFile(appCacheDir)
             FileOutputStream(screenshot).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 50, out)
             }
-            documentDao.updateLastAccessed(documentId, Date().time)
+            documentDao.updateLastAccessedAndSetThumbnailAvailable(documentId)
         }
     }
 

@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable name="document" type="com.viliussutkus89.documenter.model.Document" />
+        <variable name="appCacheDir" type="java.io.File" />
     </data>
 
     <com.google.android.material.card.MaterialCardView
@@ -23,7 +24,8 @@
                 android:id="@+id/thumbnail"
                 android:layout_width="match_parent"
                 android:layout_height="194dp"
-                app:srcCompat="@drawable/loading_img"
+                app:documentThumbnail="@{document}"
+                app:cacheDir="@{appCacheDir}"
                 android:scaleType="centerCrop" />
             <LinearLayout
                 android:layout_width="match_parent"

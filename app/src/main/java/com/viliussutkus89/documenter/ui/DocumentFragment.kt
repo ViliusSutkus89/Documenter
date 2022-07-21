@@ -59,13 +59,6 @@ class DocumentFragment: Fragment() {
         DocumentViewModel.Factory(args.documentId, app.documentDatabase.documentDao())
     }
 
-    private fun takeScreenshot() {
-        val view = binding.documentWrapper
-        val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-        view.draw(Canvas(bitmap))
-        viewModel.saveBitmap(bitmap, requireContext().cacheDir)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -108,7 +101,11 @@ class DocumentFragment: Fragment() {
 
     override fun onPause() {
         super.onPause()
-        takeScreenshot()
+
+        val view = binding.documentWrapper
+        val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        view.draw(Canvas(bitmap))
+        viewModel.saveThumbnail(bitmap, requireContext().cacheDir)
     }
 
     override fun onDestroyView() {

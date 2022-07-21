@@ -22,6 +22,11 @@ package com.viliussutkus89.documenter.model
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
+// Now() unavailable in SQLite
+// unixepoch() added only recently
+// strftime('%s') is current timestamp
+private const val CURRENT_TIMESTAMP = "strftime('%s')"
+
 @Dao
 interface DocumentDao {
     @Query("SELECT * FROM `document` ORDER BY `last_accessed` DESC")
@@ -42,8 +47,11 @@ interface DocumentDao {
     @Query("SELECT `id`, `filename`, `converted_filename` FROM `document` WHERE `id` = :id")
     fun getFilenameConvertedFilename(id: Long): Flow<DocumentScoped_Filename_ConvertedFilename>
 
-    @Query("UPDATE `document` SET `last_accessed` = :lastAccessed WHERE `id` = :id")
-    fun updateLastAccessed(id: Long, lastAccessed: Long)
+    @Query("UPDATE `document` SET `last_accessed` = $CURRENT_TIMESTAMP WHERE `id` = :id")
+    fun updateLastAccessed(id: Long)
+
+    @Query("UPDATE `document` SET `last_accessed` = $CURRENT_TIMESTAMP, `thumbnail_available` = 1 WHERE `id` = :id")
+    fun updateLastAccessedAndSetThumbnailAvailable(id: Long)
 
     @Query("UPDATE `document` SET `state` = :state WHERE `id` = :id AND `state` < :state AND `state` != :internal_errorState")
     fun progressState(id: Long, state: State, internal_errorState: State = State.Error)

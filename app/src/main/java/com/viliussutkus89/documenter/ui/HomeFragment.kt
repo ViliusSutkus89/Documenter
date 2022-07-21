@@ -39,12 +39,11 @@ class HomeFragment: Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
+    private val app get() = requireActivity().application as DocumenterApplication
     private val homeViewModel: HomeViewModel by viewModels {
-        val app = requireActivity().application as DocumenterApplication
         HomeViewModel.Factory(app.documentDatabase.documentDao())
     }
     private val converterViewModel: ConverterViewModel by activityViewModels {
-        val app = requireActivity().application as DocumenterApplication
         ConverterViewModel.Factory(app, app.documentDatabase.documentDao())
     }
 

@@ -54,7 +54,10 @@ data class Document(
     @ColumnInfo(name = "last_accessed")
     val lastAccessed: Long = Date().time,
 
-    val state: State = State.Init
+    val state: State = State.Init,
+
+    @ColumnInfo(name = "thumbnail_available")
+    val thumbnailAvailable: Boolean = false
 )
 
 data class DocumentScoped_Filename_State(
@@ -127,8 +130,10 @@ fun DocumentScoped_Filename_ConvertedFilename.getScreenshotFile(appCacheDir: Fil
     return File(documentDir, "screenshot.png")
 }
 
-fun Document.getScreenshotFile(appCacheDir: File): File {
-    val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
-    val documentDir = File(cacheDir, id.toString())
-    return File(documentDir, "screenshot.png")
+fun Document.getThumbnailFile(appCacheDir: File): File? {
+    return if (thumbnailAvailable) {
+        val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
+        val documentDir = File(cacheDir, id.toString())
+        File(documentDir, "screenshot.png")
+    } else null
 }
