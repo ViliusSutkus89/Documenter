@@ -58,11 +58,15 @@ jobs:
       - run: ./ci-scripts/getVersion --ci
         id: version
 
-      - name: Rename APK/AAB
+      - name: Rename AAB and APKs
         run: |
           mkdir artifacts
           mv app/build/outputs/bundle/release/app-release.aab artifacts/${{ github.event.repository.name }}-v${{ steps.version.outputs.version }}.aab
-          find app/build/outputs/apk/release/ -type f -name '*.apk' -exec mv {} artifacts/${{ github.event.repository.name }}-v${{ steps.version.outputs.version }}-{}
+          srcFolder=app/build/outputs/apk/release
+          for apk in $srcFolder/*.apk; do
+            apkNoPrefix=${apk#"$srcFolder"/app-}
+            mv $apk artifacts/${{ github.event.repository.name }}-v${{ steps.version.outputs.version }}-$apkNoPrefix
+          done
           ls -lh artifacts
 
       - uses: actions/upload-artifact@v3
