@@ -55,6 +55,18 @@ android {
     }
 
     lint.abortOnError = false
+
+    if (System.getenv('SIGNING_KEYFILE') && System.getenv('SIGNING_ALIAS') && System.getenv('SIGNING_PASS')) {
+        signingConfigs {
+            release {
+                storeFile file(System.getenv('SIGNING_KEYFILE'))
+                storePassword System.getenv('SIGNING_PASS')
+                keyAlias System.getenv('SIGNING_ALIAS')
+                keyPassword System.getenv('SIGNING_PASS')
+            }
+        }
+        buildTypes.release.signingConfig signingConfigs.release
+    }
 }
 
 dependencies {
