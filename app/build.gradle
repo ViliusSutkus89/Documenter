@@ -39,6 +39,11 @@ android {
         jvmTarget = '1.8'
     }
 
+    splits.abi {
+        enable true
+        universalApk true
+    }
+
     packagingOptions {
         // These files are identical.
         // Build is not supposed to break when identical files are found in several dependencies
