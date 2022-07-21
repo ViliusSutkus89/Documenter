@@ -83,14 +83,14 @@ jobs:
             adb logcat -c || true
             adb logcat > testResults/logcat.txt &
 
-            adb shell screencap /data/local/tmp/beforeTests.png
-            adb pull /data/local/tmp/beforeTests.png testResults/screenshots/
+            adb shell screencap /data/local/tmp/beforeTests.png || true
+            adb pull /data/local/tmp/beforeTests.png testResults/screenshots/ || true
 
             ./gradlew connectedCheck || touch sorry_but_tests_are_failing
             adb pull /sdcard/Android/data/com.viliussutkus89.documenter/files/Pictures testResults/ || true
 
-            adb shell screencap /data/local/tmp/afterTests.png
-            adb pull /data/local/tmp/afterTests.png testResults/screenshots/
+            adb shell screencap /data/local/tmp/afterTests.png || true
+            adb pull /data/local/tmp/afterTests.png testResults/screenshots/ || true
 
             mv app/build/reports/androidTests/connected testResults/
             mv app/build/outputs/androidTest-results testResults/
