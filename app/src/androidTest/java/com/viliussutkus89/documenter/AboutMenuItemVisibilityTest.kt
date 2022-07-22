@@ -29,7 +29,7 @@ class AboutMenuItemVisibilityTest {
 
     @Before
     fun setUp() {
-        @Suppress("Deprecated") // ACTION_CLOSE_SYSTEM_DIALOGS is perfectly fine in tests
+        @Suppress("DEPRECATION") // ACTION_CLOSE_SYSTEM_DIALOGS is perfectly fine in tests
         InstrumentationRegistry.getInstrumentation().context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
     }
 
