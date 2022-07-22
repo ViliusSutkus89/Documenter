@@ -1,3 +1,22 @@
+/*
+ * AboutFragment.kt
+ *
+ * Copyright (C) 2022 ViliusSutkus89.com
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.viliussutkus89.documenter.ui
 
 import android.os.Bundle
@@ -18,6 +37,7 @@ class AboutFragment: Fragment(R.layout.fragment_about) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        (requireActivity() as MainActivity).setAboutButtonVisibility(false)
         return FragmentAboutBinding.inflate(inflater, container, false).apply {
             documenterVersion = BuildConfig.VERSION_NAME
             // @TODO: expose these strings in libraries
@@ -26,9 +46,24 @@ class AboutFragment: Fragment(R.layout.fragment_about) {
         }.root
     }
 
+    private var navigatingToAboutLibs = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         view.findViewById<Button>(R.id.show_licenses).setOnClickListener {
+            navigatingToAboutLibs = true
             findNavController().navigate(AboutFragmentDirections.actionAboutFragmentToAboutLibs())
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        navigatingToAboutLibs = false
+    }
+
+    override fun onPause() {
+        if (!navigatingToAboutLibs) {
+            (requireActivity() as MainActivity).setAboutButtonVisibility(true)
+        }
+        super.onPause()
     }
 }

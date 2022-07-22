@@ -46,22 +46,32 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         ConverterViewModel.Factory(app, app.documentDatabase.documentDao())
     }
 
+    private val aboutMenuButtonProvider = object: MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.main_menu, menu)
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+            return if (R.id.about == menuItem.itemId) {
+                navController.navigate(AboutFragmentDirections.actionGlobalAboutFragment())
+                true
+            } else false
+        }
+    }
+
+    internal fun setAboutButtonVisibility(value: Boolean) {
+        if (value) {
+            addMenuProvider(aboutMenuButtonProvider)
+        } else {
+            removeMenuProvider(aboutMenuButtonProvider)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupActionBarWithNavController(navController)
 
-        addMenuProvider(object: MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.main_menu, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return if (R.id.about == menuItem.itemId) {
-                    navController.navigate(R.id.action_global_aboutFragment)
-                    true
-                } else false
-            }
-        })
+        addMenuProvider(aboutMenuButtonProvider)
 
         converterViewModel.workWatcher.observe(this) {}
     }
