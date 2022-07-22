@@ -36,6 +36,9 @@ permissions:
   security-events: none
   statuses: none
 
+env:
+  applicationId: com.viliussutkus89.documenter
+
 jobs:
   test:
     # Only macos VMs are available with exposed CPU extensions to run hardware accelerated emulator
@@ -79,18 +82,22 @@ jobs:
           sdcard-path-or-size: 1G
           disk-size: 8G
           script: |
-            mkdir -p testResults/screenshots
+            mkdir -p testResults/TestScreenshots
             adb logcat -c || true
             adb logcat > testResults/logcat.txt &
 
             adb shell screencap /data/local/tmp/beforeTests.png || true
-            adb pull /data/local/tmp/beforeTests.png testResults/screenshots/ || true
+            adb pull /data/local/tmp/beforeTests.png testResults/TestScreenshots/ || true
 
             ./gradlew connectedCheck || touch sorry_but_tests_are_failing
-            adb pull /sdcard/Android/data/com.viliussutkus89.documenter/files/Pictures testResults/ || true
+            # Depending on API version, TestScreenshots could be in any of these dirs
+            adb pull /data/local/tmp/TestScreenshots testResults/TestScreenshots/ || true
+            adb pull /sdcard/Android/data/$applicationId/cache/TestScreenshots testResults/TestScreenshots/ || true
+            adb pull /data/user/0/$applicationId/cache/TestScreenshots testResults/TestScreenshots/ || true
+            adb pull /data/data/$applicationId/cache/TestScreenshots testResults/TestScreenshots/ || true
 
             adb shell screencap /data/local/tmp/afterTests.png || true
-            adb pull /data/local/tmp/afterTests.png testResults/screenshots/ || true
+            adb pull /data/local/tmp/afterTests.png testResults/TestScreenshots/ || true
 
             mv app/build/reports/androidTests/connected testResults/
             mv app/build/outputs/androidTest-results testResults/

@@ -25,6 +25,7 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.IdlingRegistry
@@ -79,11 +80,13 @@ class InstrumentedTest {
     }
 
     @get:Rule
-    val screenshotFailedTestRule = ScreenshotFailedTestRule(InstrumentationRegistry.getInstrumentation())
+    val screenshotFailedTestRule = ScreenshotFailedTestRule()
 
     @Before
     fun setUp() {
-        ActivityScenario.launch(MainActivity::class.java).onActivity { activity ->
+        launchActivity<MainActivity>().onActivity { activity ->
+            screenshotFailedTestRule.activity = activity
+
             @Suppress("DEPRECATION") // ACTION_CLOSE_SYSTEM_DIALOGS is perfectly fine in tests
             activity.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
             idlingResource = activity.idlingResource

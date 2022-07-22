@@ -19,21 +19,57 @@
 
 package com.viliussutkus89.documenter
 
-import android.app.Instrumentation
-import android.os.Environment
-import androidx.test.uiautomator.UiDevice
+import android.app.Activity
+import android.graphics.Bitmap
+import android.util.Log
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.runner.screenshot.BasicScreenCaptureProcessor
+import androidx.test.runner.screenshot.Screenshot
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.io.File
 import java.io.IOException
 
-class ScreenshotFailedTestRule(private val instrumentation: Instrumentation): TestWatcher() {
+class ScreenshotFailedTestRule: TestWatcher() {
+    companion object {
+        private const val TAG = "ScreenFailedTestRule"
+    }
+
+    private val processor = object: BasicScreenCaptureProcessor() {
+        init { mDefaultScreenshotPath = getStorageDir() }
+        private fun getStorageDir(): File? {
+            val ctx = InstrumentationRegistry.getInstrumentation().targetContext
+            listOfNotNull(
+                File("/data/local/tmp"),
+                ctx.cacheDir,
+                ctx.externalCacheDir
+            ).map { File(it, "TestScreenshots") }
+            .forEach {
+                it.mkdirs()
+                if (it.isDirectory && it.canWrite()) {
+                    Log.v(TAG, "setting mDefaultScreenshotPath to " + it.path)
+                    return it
+                }
+            }
+            return null
+        }
+    }
+
+    // Activity required for API level <18
+    lateinit var activity: Activity
+
     override fun failed(e: Throwable, description: Description) {
-        val folder = instrumentation.targetContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val screenshotFile = File(folder, description.testClass.simpleName + "-" + description.methodName + ".png")
-        val uiDevice = UiDevice.getInstance(instrumentation)
+        val capture = if (::activity.isInitialized) {
+            Screenshot.capture(activity)
+        } else {
+            Screenshot.capture()
+        }
+        capture.apply {
+            name = description.testClass.simpleName + "-" + description.methodName
+            format = Bitmap.CompressFormat.PNG
+        }
         try {
-            uiDevice.takeScreenshot(screenshotFile)
+            processor.process(capture)
         } catch (err: IOException) {
             err.printStackTrace()
         }

@@ -21,6 +21,7 @@ package com.viliussutkus89.documenter.ui
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -102,8 +103,14 @@ class HomeFragment: Fragment() {
             adapter.submitList(documentList)
         }
 
-        binding.openButton.setOnClickListener {
-            openDocument.launch(ConverterViewModel.supportedMimeTypes)
+        binding.openButton.apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                this.setOnClickListener {
+                    openDocument.launch(ConverterViewModel.supportedMimeTypes)
+                }
+            } else {
+                this.isEnabled = false
+            }
         }
     }
 }
