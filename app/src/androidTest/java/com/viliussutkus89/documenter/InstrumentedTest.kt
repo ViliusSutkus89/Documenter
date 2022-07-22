@@ -24,7 +24,6 @@ import android.app.Instrumentation
 import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
-import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingPolicies
