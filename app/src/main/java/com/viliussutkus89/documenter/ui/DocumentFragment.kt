@@ -139,21 +139,34 @@ class DocumentFragment: Fragment() {
                         }
                         true
                     }
-                    R.id.share -> {
+                    R.id.open_with, R.id.share -> {
                         viewModel.document.observeOnce(viewLifecycleOwner) { document ->
                             document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
                                 val convertedUri = FileProvider.getUriForFile(requireContext(), requireContext().packageName + ".provider", htmlFile)
                                 binding.documentView.loadUrl(convertedUri.toString())
 
-                                try {
-                                    startActivity(Intent(Intent.ACTION_SEND).apply {
-                                        type = "text/html"
-                                        putExtra(Intent.EXTRA_STREAM, convertedUri)
-                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                    })
-                                } catch (e: ActivityNotFoundException) {
-                                    e.printStackTrace()
-                                    Snackbar.make(view, R.string.error_share_failed, Snackbar.LENGTH_LONG).show()
+                                when(menuItem.itemId) {
+                                    R.id.open_with -> {
+                                        try {
+                                            startActivity(Intent(Intent.ACTION_VIEW, convertedUri)
+                                                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
+                                        } catch (e: ActivityNotFoundException) {
+                                            e.printStackTrace()
+                                            Snackbar.make(view, R.string.error_open_with_failed, Snackbar.LENGTH_LONG).show()
+                                        }
+                                    }
+                                    R.id.share -> {
+                                        try {
+                                            startActivity(Intent(Intent.ACTION_SEND).apply {
+                                                type = "text/html"
+                                                putExtra(Intent.EXTRA_STREAM, convertedUri)
+                                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            })
+                                        } catch (e: ActivityNotFoundException) {
+                                            e.printStackTrace()
+                                            Snackbar.make(view, R.string.error_share_failed, Snackbar.LENGTH_LONG).show()
+                                        }
+                                    }
                                 }
                             }
                         }

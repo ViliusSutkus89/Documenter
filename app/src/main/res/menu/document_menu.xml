@@ -7,6 +7,11 @@
         android:title="@string/menu_save"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/open_with"
+        android:icon="@drawable/ic_baseline_open_in_new_24"
+        android:title="@string/menu_open_with"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/share"
         android:icon="@drawable/ic_baseline_share_24"
         android:title="@string/menu_share"
