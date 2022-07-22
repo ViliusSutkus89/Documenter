@@ -1,5 +1,6 @@
 package com.viliussutkus89.documenter
 
+import android.content.Intent
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -11,6 +12,7 @@ import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.viliussutkus89.documenter.ui.MainActivity
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,6 +26,12 @@ class AboutMenuItemVisibilityTest {
 
     @get:Rule
     val rule = activityScenarioRule<MainActivity>()
+
+    @Before
+    fun setUp() {
+        @Suppress("Deprecated") // ACTION_CLOSE_SYSTEM_DIALOGS is perfectly fine in tests
+        InstrumentationRegistry.getInstrumentation().context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
+    }
 
     @Test
     fun shownInHome_Test() {

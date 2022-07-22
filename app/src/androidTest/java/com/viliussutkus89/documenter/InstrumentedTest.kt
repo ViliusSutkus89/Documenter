@@ -84,6 +84,8 @@ class InstrumentedTest {
     @Before
     fun setUp() {
         ActivityScenario.launch(MainActivity::class.java).onActivity { activity ->
+            @Suppress("Deprecated") // ACTION_CLOSE_SYSTEM_DIALOGS is perfectly fine in tests
+            activity.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
             idlingResource = activity.idlingResource
             IdlingRegistry.getInstance().register(idlingResource)
         }
