@@ -81,4 +81,11 @@ jobs:
           tag: "v${{ steps.version.outputs.version }}"
           name: "${{ github.event.repository.name }} v${{ steps.version.outputs.version }}"
           artifacts: "artifacts/*,app/build/reports/lint-results-release.html"
+          bodyFile: "UpcomingReleaseNotes.md"
           draft: true
+
+      - run: echo -n > UpcomingReleaseNotes.md
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Post release UpcomingReleaseNotes.md truncation"
+          file_pattern: UpcomingReleaseNotes.md
