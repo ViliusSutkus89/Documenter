@@ -90,10 +90,13 @@ jobs:
 
             ./gradlew connectedCheck || touch sorry_but_tests_are_failing
             # Depending on API version, TestScreenshots could be in any of these dirs
+
             adb pull /data/local/tmp/TestScreenshots testResults/TestScreenshots/ || true
-            adb pull /sdcard/Android/data/$applicationId/cache/TestScreenshots testResults/TestScreenshots/ || true
-            adb pull /data/user/0/$applicationId/cache/TestScreenshots testResults/TestScreenshots/ || true
-            adb pull /data/data/$applicationId/cache/TestScreenshots testResults/TestScreenshots/ || true
+            ./ci-scripts/adbPullAs $applicationId \
+              /data/data/$applicationId/cache/TestScreenshots \
+              /data/user/0/$applicationId/cache/TestScreenshots \
+              /sdcard/Android/data/$applicationId/cache/TestScreenshots \
+              testResults/ || true
 
             adb shell screencap /data/local/tmp/afterTests.png || true
             adb pull /data/local/tmp/afterTests.png testResults/TestScreenshots/ || true
