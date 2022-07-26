@@ -68,7 +68,12 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
       - uses: android-actions/setup-android@v2
+
+      - run: pip install adbPullAs
 
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -92,7 +97,7 @@ jobs:
             # Depending on API version, TestScreenshots could be in any of these dirs
 
             adb pull /data/local/tmp/TestScreenshots testResults/TestScreenshots/ || true
-            ./ci-scripts/adbPullAs $applicationId \
+            adbPullAs $applicationId \
               /data/data/$applicationId/cache/TestScreenshots \
               /data/user/0/$applicationId/cache/TestScreenshots \
               /sdcard/Android/data/$applicationId/cache/TestScreenshots \
