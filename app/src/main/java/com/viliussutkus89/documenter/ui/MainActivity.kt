@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     @VisibleForTesting
-    val idlingResource by idlingResourceDelegate
+    internal val idlingResource by idlingResourceDelegate
 
     internal fun isIdlingResourceInitialized() = idlingResourceDelegate.isInitialized()
 
