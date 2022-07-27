@@ -21,6 +21,7 @@ package com.viliussutkus89.documenter
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
+import android.os.Build
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.launchActivity
@@ -35,6 +36,7 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.filters.LargeTest
+import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import com.viliussutkus89.android.assetextractor.AssetExtractor
 import com.viliussutkus89.documenter.ui.MainActivity
@@ -46,6 +48,7 @@ import java.util.concurrent.TimeUnit
 
 @LargeTest
 @RunWith(Parameterized::class)
+@SdkSuppress(minSdkVersion = Build.VERSION_CODES.KITKAT)
 class InstrumentedTest {
     @Parameterized.Parameter
     lateinit var testFile: File
@@ -60,7 +63,7 @@ class InstrumentedTest {
         }
 
         @BeforeClass @JvmStatic
-        fun extractPDFs() {
+        fun extractDocuments() {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             AssetExtractor(instrumentation.context.assets)
                 .setNoOverwrite()
