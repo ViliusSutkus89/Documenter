@@ -46,18 +46,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Oldest supported API
+          # Oldest provisionally supported API
+          - arch: x86
+            api-level: 16
+            api-type-target: default
+          # Oldest properly supported API
           - arch: x86
             api-level: 19
             api-type-target: default
-          # Oldest x86_64 image
           - arch: x86_64
-            api-level: 21
+            api-level: 26
             api-type-target: default
-          # Latest x86 image
-          - arch: x86
-            api-level: 30
-            api-type-target: google_atd
           # Latest image
           - arch: x86_64
             api-level: 33
