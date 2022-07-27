@@ -26,11 +26,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import com.viliussutkus89.documenter.DocumenterApplication
+import com.viliussutkus89.documenter.PreKitKatFragmentDirections
+import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.databinding.FragmentHomeBinding
 import com.viliussutkus89.documenter.viewmodel.HomeViewModel
 import com.viliussutkus89.documenter.viewmodel.ConverterViewModel
@@ -52,9 +56,33 @@ class HomeFragment: Fragment() {
     }
 
     private fun openUri(uri: Uri) {
-        (requireActivity() as MainActivity).incrementIdlingResource()
-        converterViewModel.convertDocument(uri).observe(viewLifecycleOwner) { document ->
-            findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(document.id, document.filename))
+        if ("content" == uri.scheme) {
+            (requireActivity() as MainActivity).incrementIdlingResource()
+            converterViewModel.convertDocument(uri).observe(viewLifecycleOwner) { document ->
+                findNavController().navigate(
+                    HomeFragmentDirections.actionHomeFragmentToLoadingFragment(
+                        document.id, document.filename
+                    )
+                )
+            }
+        } else {
+            binding.root.doOnLayout {
+                Snackbar.make(it, R.string.error_file_scheme, Snackbar.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun handleIntent(intent: Intent) {
+        when (intent.action) {
+            // ACTION_VIEW sends URI in data field
+            Intent.ACTION_VIEW -> intent.data
+            // ACTION_SEND sends URI in parcelable extra
+            Intent.ACTION_SEND -> intent.getParcelableExtra(Intent.EXTRA_STREAM)
+            else -> null
+        }?.let {
+            if (!homeViewModel.intentUriHandlerGate()) {
+                openUri(it)
+            }
         }
     }
 
@@ -62,20 +90,8 @@ class HomeFragment: Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        requireActivity().intent.let { intent ->
-            when (requireActivity().intent.action) {
-                // ACTION_VIEW sends URI in data field
-                Intent.ACTION_VIEW -> intent.data
-                // ACTION_SEND sends URI in parcelable extra
-                Intent.ACTION_SEND -> intent.getParcelableExtra(Intent.EXTRA_STREAM)
-                else -> null
-            }?.let {
-                if (!homeViewModel.intentUriHandlerGate()) {
-                    openUri(it)
-                }
-            }
-        }
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        handleIntent(requireActivity().intent)
         return binding.root
     }
 
@@ -103,12 +119,15 @@ class HomeFragment: Fragment() {
         }
 
         binding.openButton.apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                this.setOnClickListener {
+            this.setOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     openDocument.launch(ConverterViewModel.supportedMimeTypes)
+                } else {
+                    findNavController().navigate(PreKitKatFragmentDirections.actionGlobalPreKitKatFragment())
                 }
-            } else {
-                this.isEnabled = false
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                binding.openButton.setImageResource(R.drawable.ic_baseline_clear_24)
             }
         }
     }

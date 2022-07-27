@@ -66,4 +66,10 @@
     <action android:id="@+id/action_global_aboutFragment" app:destination="@id/aboutFragment" />
 
     <include app:graph="@navigation/aboutlibs_navigation" />
+    <fragment
+        android:id="@+id/preKitKatFragment"
+        android:name="com.viliussutkus89.documenter.PreKitKatFragment"
+        android:label="@string/fragment_pre_kit_kat_label"
+        tools:layout="@layout/fragment_pre_kit_kat" /><action android:id="@+id/action_global_preKitKatFragment" app:destination="@id/preKitKatFragment"/>
+
 </navigation>
