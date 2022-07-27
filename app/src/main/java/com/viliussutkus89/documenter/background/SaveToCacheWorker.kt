@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -50,7 +51,8 @@ class SaveToCacheWorker(context: Context, params: WorkerParameters): Worker(cont
     }
 
     private fun takePermission(uri: Uri): Boolean {
-        if (uri.scheme == "content") {
+        // takePersistableUriPermission requires API 19
+        if (uri.scheme == "content" && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             if (applicationContext.checkUriPermission(uri, android.os.Process.myPid(), android.os.Process.myUid(), Intent.FLAG_GRANT_READ_URI_PERMISSION) == PackageManager.PERMISSION_GRANTED) {
                 try {
                     cr.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
