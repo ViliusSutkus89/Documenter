@@ -73,6 +73,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         addMenuProvider(aboutMenuButtonProvider)
 
         converterViewModel.workWatcher.observe(this) {}
+
+        if (intent.getBooleanExtra(FORCE_INIT_IDLING_RESOURCE, false)) {
+            idlingResource.increment()
+            idlingResource.decrement()
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -81,6 +86,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private val idlingResourceDelegate = lazy {
         CountingIdlingResource("${javaClass.name}.idlingResource")
+    }
+
+    companion object {
+        @VisibleForTesting
+        internal const val FORCE_INIT_IDLING_RESOURCE = "force_init_idling_resource"
     }
 
     @VisibleForTesting
