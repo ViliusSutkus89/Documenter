@@ -1,0 +1,2 @@
+- Minify and shrink release build
+- Save button lifecycle fix
