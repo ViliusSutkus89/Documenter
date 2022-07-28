@@ -18,11 +18,13 @@
 
 package com.viliussutkus89.documenter.ui
 
+import android.os.Build
 import android.widget.ImageView
 import androidx.core.net.toUri
 import androidx.databinding.BindingAdapter
 import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.model.Document
+import com.viliussutkus89.documenter.model.State
 import com.viliussutkus89.documenter.model.getThumbnailFile
 import java.io.File
 
@@ -31,6 +33,14 @@ fun setDocumentThumbnail(imageView: ImageView, document: Document, appCacheDir: 
     document.getThumbnailFile(appCacheDir)?.let {
         imageView.setImageURI(it.toUri())
     } ?: run {
-        imageView.setImageResource(R.drawable.loading_img)
+        imageView.setImageResource(
+            if (document.state == State.Converted) {
+                R.drawable.ic_folder_open
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                R.drawable.loading_animation
+            } else {
+                R.drawable.loading_img
+            }
+        )
     }
 }
