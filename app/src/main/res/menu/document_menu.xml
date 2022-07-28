@@ -2,11 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/save"
-        android:icon="@drawable/ic_outline_save_24"
-        android:title="@string/menu_save"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/open_with"
         android:icon="@drawable/ic_baseline_open_in_new_24"
         android:title="@string/menu_open_with"

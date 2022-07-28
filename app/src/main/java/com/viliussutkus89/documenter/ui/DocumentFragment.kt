@@ -24,6 +24,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.webkit.WebView
@@ -124,6 +125,9 @@ class DocumentFragment: Fragment() {
         requireActivity().addMenuProvider(object: MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.document_menu, menu)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    menuInflater.inflate(R.menu.document_menu_kitkat, menu)
+                }
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
