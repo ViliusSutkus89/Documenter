@@ -55,7 +55,7 @@ jobs:
             api-level: 19
             api-type-target: default
           - arch: x86_64
-            api-level: 26
+            api-level: 28
             api-type-target: default
           # Latest image
           - arch: x86_64
