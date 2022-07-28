@@ -96,6 +96,11 @@ class DocumentFragment: Fragment() {
                 }
             }
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            requireActivity().addMenuProvider(saveMenu, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }
+        requireActivity().addMenuProvider(documentMenu, viewLifecycleOwner, Lifecycle.State.RESUMED)
         return binding.root
     }
 
@@ -121,74 +126,70 @@ class DocumentFragment: Fragment() {
         outState.putBundle(BUNDLE_KEY_DOCUMENT_VIEW, documentViewBundle)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            requireActivity().addMenuProvider(object: MenuProvider {
-                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                    menuInflater.inflate(R.menu.document_menu_kitkat, menu)
-                }
-
-                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                    return if (menuItem.itemId == R.id.save) {
-                        viewModel.document.observeOnce(viewLifecycleOwner) { document ->
-                            registerForActivityResult<String, Uri>(ActivityResultContracts.CreateDocument("text/html")) {
-                                it?.let {
-                                    viewModel.saveDocument(it, requireContext())
-                                }
-                            }.launch(document.convertedFilename)
-                        }
-                        true
-                    } else false
-                }
-            })
+    private val saveMenu = object: MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.document_menu_save, menu)
         }
 
-        requireActivity().addMenuProvider(object: MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.document_menu, menu)
-                // Workaround for Issue #7
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-                    menu.findItem(R.id.open_with).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                    menu.findItem(R.id.share).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                }
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                if (!listOf(R.id.open_with, R.id.share).contains(menuItem.itemId)) {
-                    return false
-                }
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+            return if (menuItem.itemId == R.id.save) {
                 viewModel.document.observeOnce(viewLifecycleOwner) { document ->
-                    document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
-                        val convertedUri = FileProvider.getUriForFile(requireContext(), requireContext().packageName + ".provider", htmlFile)
-                        binding.documentView.loadUrl(convertedUri.toString())
+                    registerForActivityResult<String, Uri>(ActivityResultContracts.CreateDocument("text/html")) {
+                        it?.let {
+                            viewModel.saveDocument(it, requireContext())
+                        }
+                    }.launch(document.convertedFilename)
+                }
+                true
+            } else false
+        }
+    }
 
-                        when(menuItem.itemId) {
-                            R.id.open_with -> {
-                                try {
-                                    startActivity(Intent(Intent.ACTION_VIEW, convertedUri)
-                                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
-                                } catch (e: ActivityNotFoundException) {
-                                    e.printStackTrace()
-                                    Snackbar.make(view, R.string.error_open_with_failed, Snackbar.LENGTH_LONG).show()
-                                }
+    private val documentMenu = object: MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.document_menu, menu)
+            // Workaround for Issue #7
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                menu.findItem(R.id.open_with).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+                menu.findItem(R.id.share).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+            }
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+            if (!listOf(R.id.open_with, R.id.share).contains(menuItem.itemId)) {
+                return false
+            }
+            viewModel.document.observeOnce(viewLifecycleOwner) { document ->
+                document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
+                    val convertedUri = FileProvider.getUriForFile(requireContext(), requireContext().packageName + ".provider", htmlFile)
+                    binding.documentView.loadUrl(convertedUri.toString())
+
+                    when(menuItem.itemId) {
+                        R.id.open_with -> {
+                            try {
+                                startActivity(Intent(Intent.ACTION_VIEW, convertedUri)
+                                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
+                            } catch (e: ActivityNotFoundException) {
+                                e.printStackTrace()
+                                Snackbar.make(binding.root, R.string.error_open_with_failed, Snackbar.LENGTH_LONG).show()
                             }
-                            R.id.share -> {
-                                try {
-                                    startActivity(Intent(Intent.ACTION_SEND).apply {
-                                        type = "text/html"
-                                        putExtra(Intent.EXTRA_STREAM, convertedUri)
-                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                    })
-                                } catch (e: ActivityNotFoundException) {
-                                    e.printStackTrace()
-                                    Snackbar.make(view, R.string.error_share_failed, Snackbar.LENGTH_LONG).show()
-                                }
+                        }
+                        R.id.share -> {
+                            try {
+                                startActivity(Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/html"
+                                    putExtra(Intent.EXTRA_STREAM, convertedUri)
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                })
+                            } catch (e: ActivityNotFoundException) {
+                                e.printStackTrace()
+                                Snackbar.make(binding.root, R.string.error_share_failed, Snackbar.LENGTH_LONG).show()
                             }
                         }
                     }
                 }
-                return true
             }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+            return true
+        }
     }
 }
