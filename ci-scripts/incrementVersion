@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+# Copyright (C) 2022
+# ViliusSutkus89.com
+# https://github.com/ViliusSutkus89/Documenter
+#
+# Documenter is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3,
+# as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import getopt
+import os
+import sys
+from version import Versioner
+
+
+if __name__ == '__main__':
+    major = False
+    minor = False
+    patch = False
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], '', ['major', 'minor', 'patch'])
+        for o, a in opts:
+            if o == '--major':
+                major = True
+            if o == '--minor':
+                minor = True
+            if o == '--patch':
+                patch = True
+
+    except getopt.GetoptError as err:
+        print(err, file=sys.stderr)
+        exit(os.EX_USAGE)
+
+    versioner = Versioner()
+    old_version_name = versioner.version_name
+    old_version_code = versioner.version_code
+    if major:
+        versioner.increment_major()
+    elif minor:
+        versioner.increment_minor()
+    elif patch:
+        versioner.increment_patch()
+    else:
+        print('Specify either --major, --minor or --patch', file=sys.stderr)
+        exit(os.EX_USAGE)
+
+    new_version_name = versioner.version_name
+    new_version_code = versioner.version_code
+    print(f'::set-output name=oldVersionName::{old_version_name}')
+    print(f'::set-output name=oldVersionCode::{old_version_code}')
+    print(f'::set-output name=newVersionName::{new_version_name}')
+    print(f'::set-output name=newVersionCode::{new_version_code}')
+    print(f'::set-output name=files::{versioner.version_file}')

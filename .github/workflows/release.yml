@@ -83,8 +83,16 @@ jobs:
           artifacts: "artifacts/*,app/build/reports/lint-results-release.html"
           bodyFile: "UpcomingReleaseNotes.md"
 
+      - run: ./ci-scripts/incrementVersion --patch
+        id: postReleaseVersionIncrement
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "[CD]Post release version increment to ${{ steps.postReleaseVersionIncrement.outputs.newVersionName }} (from ${{ steps.postReleaseVersionIncrement.outputs.oldVersionName }})"
+          file_pattern: ${{ steps.postReleaseVersionIncrement.outputs.files }}
+
       - run: echo -n > UpcomingReleaseNotes.md
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Post release UpcomingReleaseNotes.md truncation"
+          commit_message: "[CD]Post release UpcomingReleaseNotes.md truncation"
           file_pattern: UpcomingReleaseNotes.md
