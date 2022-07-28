@@ -1,3 +1,0 @@
-- Implement "Open with" functionality for converted documents
-- (provisional) Android-4.2.2 (Jelly Bean) support. Full support from Android-4.4 (KitKat)
-- Don't show "about" button in "about" and "about libs" screens
