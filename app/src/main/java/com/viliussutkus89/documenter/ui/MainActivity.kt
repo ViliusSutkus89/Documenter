@@ -18,6 +18,7 @@
 
 package com.viliussutkus89.documenter.ui
 
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -48,6 +49,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private val aboutMenuButtonProvider = object: MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.main_menu, menu)
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                // Workaround for Issue #7
+                menu.findItem(R.id.about).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+            }
         }
 
         override fun onMenuItemSelected(menuItem: MenuItem): Boolean {

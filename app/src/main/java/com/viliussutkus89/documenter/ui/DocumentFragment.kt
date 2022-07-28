@@ -127,6 +127,10 @@ class DocumentFragment: Fragment() {
                 menuInflater.inflate(R.menu.document_menu, menu)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     menuInflater.inflate(R.menu.document_menu_kitkat, menu)
+                } else {
+                    // Workaround for Issue #7
+                    menu.findItem(R.id.open_with).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+                    menu.findItem(R.id.share).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
                 }
             }
 
