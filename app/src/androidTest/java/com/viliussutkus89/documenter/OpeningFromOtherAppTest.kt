@@ -82,7 +82,7 @@ class OpeningFromOtherAppTest {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         val authority = appContext.packageName + ".instrumentedTestsProvider"
         val uri = FileProvider.getUriForFile(appContext, authority, testFile)
-        val viewIntent = Intent(Intent.ACTION_VIEW, uri)
+        val viewIntent = Intent(Intent.ACTION_VIEW, uri, appContext, MainActivity::class.java)
             .putExtra(MainActivity.FORCE_INIT_IDLING_RESOURCE, true)
 
         launchActivity<MainActivity>(viewIntent).onActivity { activity ->
