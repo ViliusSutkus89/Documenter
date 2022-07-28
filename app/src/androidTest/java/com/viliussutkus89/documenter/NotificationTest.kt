@@ -1,8 +1,10 @@
 package com.viliussutkus89.documenter
 
 import android.content.Intent
+import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import com.viliussutkus89.documenter.background.ConverterWorkerCommon
 import org.junit.Before
@@ -11,6 +13,8 @@ import org.junit.runner.RunWith
 import java.util.*
 
 @RunWith(AndroidJUnit4::class)
+// Issue #8 workaround - don't run this test on Tiramisu
+@SdkSuppress(maxSdkVersion = Build.VERSION_CODES.S_V2)
 class NotificationTest {
     @Before
     fun setUp() {
