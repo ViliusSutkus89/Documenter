@@ -42,6 +42,12 @@ android {
         universalApk true
     }
 
+    buildTypes.release {
+        minifyEnabled true
+        shrinkResources true
+        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    }
+
     packagingOptions {
         // These files are identical.
         // Build is not supposed to break when identical files are found in several dependencies
