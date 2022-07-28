@@ -1,0 +1,1 @@
+[Issue #6] Hide Save button for pre KitKat devices
