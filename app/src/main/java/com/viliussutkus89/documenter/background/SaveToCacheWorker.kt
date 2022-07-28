@@ -24,6 +24,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import java.io.File
@@ -44,15 +45,23 @@ class SaveToCacheWorker(context: Context, params: WorkerParameters): Worker(cont
     private val cr by lazy { applicationContext.contentResolver }
 
     override fun doWork(): Result {
-        val permissionTook = takePermission(inputUri)
+        // takePersistableUriPermission requires API 19
+        val permissionTook = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            takePermission(inputUri)
+        } else false
+
         val copyResult = copyFromUriToFile(inputUri, cachedFile)
-        if (permissionTook) { releasePermission(inputUri) }
+
+        // Linter doesn't understand that permissionTook is always false for pre KitKat
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && permissionTook) {
+            releasePermission(inputUri)
+        }
         return if (copyResult) { Result.success() } else { Result.failure() }
     }
 
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     private fun takePermission(uri: Uri): Boolean {
-        // takePersistableUriPermission requires API 19
-        if (uri.scheme == "content" && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (uri.scheme == "content") {
             if (applicationContext.checkUriPermission(uri, android.os.Process.myPid(), android.os.Process.myUid(), Intent.FLAG_GRANT_READ_URI_PERMISSION) == PackageManager.PERMISSION_GRANTED) {
                 try {
                     cr.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -64,7 +73,9 @@ class SaveToCacheWorker(context: Context, params: WorkerParameters): Worker(cont
         return false
     }
 
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     private fun releasePermission(uri: Uri) {
+        // releasePersistableUriPermission requires API 19
         if (uri.scheme == "content") {
             cr.releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }

@@ -25,6 +25,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
@@ -51,9 +52,11 @@ class HomeFragment: Fragment() {
         ConverterViewModel.Factory(app, app.documentDatabase.documentDao())
     }
 
-    private val openDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
-        it?.let { openUri(it) }
-    }
+    private val openDocument = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) {
+            it?.let { openUri(it) }
+        }
+    } else null
 
     private fun openUri(uri: Uri) {
         if ("content" == uri.scheme) {
@@ -120,9 +123,7 @@ class HomeFragment: Fragment() {
 
         binding.openButton.apply {
             this.setOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    openDocument.launch(ConverterViewModel.supportedMimeTypes)
-                } else {
+                openDocument?.launch(ConverterViewModel.supportedMimeTypes) ?: run {
                     findNavController().navigate(PreKitKatFragmentDirections.actionGlobalPreKitKatFragment())
                 }
             }
