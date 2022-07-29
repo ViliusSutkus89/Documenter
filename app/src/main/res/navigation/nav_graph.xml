@@ -71,5 +71,9 @@
         android:name="com.viliussutkus89.documenter.PreKitKatFragment"
         android:label="@string/fragment_pre_kit_kat_label"
         tools:layout="@layout/fragment_pre_kit_kat" /><action android:id="@+id/action_global_preKitKatFragment" app:destination="@id/preKitKatFragment"/>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.viliussutkus89.documenter.ui.SettingsFragment"
+        android:label="@string/fragment_settings_label" /><action android:id="@+id/action_global_settingsFragment" app:destination="@id/settingsFragment"/>
 
 </navigation>

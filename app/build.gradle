@@ -103,6 +103,7 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:$versions.work"
     implementation "androidx.work:work-multiprocess:$versions.work"
     implementation 'androidx.concurrent:concurrent-futures:1.1.0'
+    implementation 'androidx.preference:preference:1.1.1'
 
     kapt "androidx.room:room-compiler:$versions.room"
     implementation "androidx.room:room-ktx:$versions.room"

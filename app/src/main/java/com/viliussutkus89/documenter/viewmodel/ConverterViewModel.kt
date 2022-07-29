@@ -22,6 +22,7 @@ import android.app.Application
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.preference.PreferenceManager
 import androidx.work.*
 import androidx.work.multiprocess.RemoteListenableWorker
 import com.viliussutkus89.documenter.background.*
@@ -114,6 +115,9 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
             var continuation = workManager.beginUniqueWork("document-${documentId}", ExistingWorkPolicy.REPLACE, saveToCacheWorkRequest)
 
             val type = uri.getMimeType(app.contentResolver)
+
+            val preferences = PreferenceManager.getDefaultSharedPreferences(app)
+
             val converterWorkRequest = if (pdf2htmlEXWorker.SUPPORTED_MIME_TYPES.contains(type)) {
                 documentDao.updateConvertedFilename(documentId, pdf2htmlEXWorker.generateConvertedFileName(document.filename))
                 document = documentDao.getDocument(documentId)
@@ -123,6 +127,10 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
                     .setInputData(workDataOf(
                         RemoteListenableWorker.ARGUMENT_PACKAGE_NAME to app.packageName,
                         RemoteListenableWorker.ARGUMENT_CLASS_NAME to pdf2htmlEXWorker.RemoteWorkerService::class.java.name,
+
+                        pdf2htmlEXWorker.SETTING_KEY_OUTLINE to preferences.getBoolean("pdf2htmlex_outline", true),
+                        pdf2htmlEXWorker.SETTING_KEY_DRM to preferences.getBoolean("pdf2htmlex_drm", true),
+                        pdf2htmlEXWorker.SETTING_KEY_ANNOTATIONS to preferences.getBoolean("pdf2htmlex_annotations", true),
 
                         DATA_KEY_CACHED_FILE to document.getCachedSourceFile(appCacheDir = app.cacheDir).path,
                         DATA_KEY_CONVERTED_FILE to document.getConvertedHtmlFile(appFilesDir = app.filesDir)!!.path
@@ -140,6 +148,8 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
                     .setInputData(workDataOf(
                         RemoteListenableWorker.ARGUMENT_PACKAGE_NAME to app.packageName,
                         RemoteListenableWorker.ARGUMENT_CLASS_NAME to wvWareWorker.RemoteWorkerService::class.java.name,
+
+                        wvWareWorker.SETTING_KEY_NO_GRAPHICS to preferences.getBoolean("wvware_nographics", true),
 
                         DATA_KEY_CACHED_FILE to document.getCachedSourceFile(appCacheDir = app.cacheDir).path,
                         DATA_KEY_CONVERTED_FILE to document.getConvertedHtmlFile(appFilesDir = app.filesDir)!!.path

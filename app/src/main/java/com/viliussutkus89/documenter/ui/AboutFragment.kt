@@ -36,7 +36,7 @@ class AboutFragment: Fragment(R.layout.fragment_about) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        (requireActivity() as MainActivity).setAboutButtonVisibility(false)
+        (requireActivity() as MainActivity).setMainMenuVisibility(false)
         return FragmentAboutBinding.inflate(inflater, container, false).apply {
             documenterVersion = BuildConfig.VERSION_NAME
             // @TODO: expose these strings in libraries
@@ -61,7 +61,7 @@ class AboutFragment: Fragment(R.layout.fragment_about) {
 
     override fun onPause() {
         if (!navigatingToAboutLibs) {
-            (requireActivity() as MainActivity).setAboutButtonVisibility(true)
+            (requireActivity() as MainActivity).setMainMenuVisibility(true)
         }
         super.onPause()
     }

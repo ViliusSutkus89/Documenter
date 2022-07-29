@@ -20,6 +20,7 @@ package com.viliussutkus89.documenter.background
 
 import android.content.Context
 import android.util.Log
+import androidx.preference.PreferenceManager
 import androidx.work.WorkerParameters
 import com.viliussutkus89.android.wvware.wvWare
 import java.io.File
@@ -30,6 +31,8 @@ class wvWareWorker(ctx: Context, params: WorkerParameters): ConverterWorkerCommo
 
     companion object {
         private val TAG = "WorkerwvWare"
+        const val SETTING_KEY_NO_GRAPHICS = "setting_nographics"
+
         // https://filext.com/file-extension/DOC
         val SUPPORTED_MIME_TYPES = arrayOf(
             "application/msword",
@@ -49,6 +52,9 @@ class wvWareWorker(ctx: Context, params: WorkerParameters): ConverterWorkerCommo
     override fun doWorkSync(inputFile: File): File? {
         return try {
             val converter = wvWare(applicationContext).setInputDOC(inputFile)
+            if (inputData.getBoolean(SETTING_KEY_NO_GRAPHICS, false)) {
+                converter.setNoGraphicsMode()
+            }
             converter.convertToHTML()
         } catch (e: IOException) {
             Log.e(TAG, "Conversion failed")

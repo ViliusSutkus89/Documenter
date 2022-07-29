@@ -1,0 +1,27 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/pdf2htmlex_header">
+        <SwitchPreferenceCompat
+            app:key="pdf2htmlex_outline"
+            app:title="@string/pdf2htmlex_outline_title"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="pdf2htmlex_drm"
+            app:title="@string/pdf2htmlex_drm_title"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="pdf2htmlex_annotations"
+            app:title="@string/pdf2htmlex_annotations_title"
+            app:defaultValue="true" />
+    </PreferenceCategory>
+
+   <PreferenceCategory app:title="@string/wvware_header">
+        <SwitchPreferenceCompat
+            app:key="wvware_nographics"
+            app:title="@string/wvware_nographics_title"
+            app:defaultValue="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

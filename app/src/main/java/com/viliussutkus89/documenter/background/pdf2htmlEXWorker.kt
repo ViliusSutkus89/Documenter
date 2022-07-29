@@ -30,6 +30,9 @@ class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): ConverterWorkerC
 
     companion object {
         private const val TAG = "Workerpdf2htmlEX"
+        const val SETTING_KEY_OUTLINE = "setting_outline"
+        const val SETTING_KEY_DRM = "setting_drm"
+        const val SETTING_KEY_ANNOTATIONS = "setting_annotation"
 
         // https://filext.com/file-extension/PDF
         val SUPPORTED_MIME_TYPES = arrayOf(
@@ -47,6 +50,9 @@ class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): ConverterWorkerC
     override fun doWorkSync(inputFile: File): File? {
         return try {
             val converter = pdf2htmlEX(applicationContext).setInputPDF(inputFile)
+            converter.setOutline(inputData.getBoolean(SETTING_KEY_OUTLINE, false))
+            converter.setDRM(inputData.getBoolean(SETTING_KEY_DRM, false))
+            converter.setProcessAnnotation(inputData.getBoolean(SETTING_KEY_ANNOTATIONS, false))
             converter.convert()
         } catch (e: IOException) {
             Log.e(TAG, "Conversion failed")

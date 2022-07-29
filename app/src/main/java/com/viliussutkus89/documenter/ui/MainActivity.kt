@@ -46,29 +46,37 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         ConverterViewModel.Factory(app, app.documentDatabase.documentDao())
     }
 
-    private val aboutMenuButtonProvider = object: MenuProvider {
+    private val mainMenuProvider = object: MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.main_menu, menu)
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
                 // Workaround for Issue #7
                 menu.findItem(R.id.about).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+                menu.findItem(R.id.settings).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
             }
         }
 
         override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-            return if (R.id.about == menuItem.itemId) {
-                navController.navigate(AboutFragmentDirections.actionGlobalAboutFragment())
-                true
-            } else false
+            return when (menuItem.itemId) {
+                R.id.about -> {
+                    navController.navigate(AboutFragmentDirections.actionGlobalAboutFragment())
+                    true
+                }
+                R.id.settings -> {
+                    navController.navigate(SettingsFragmentDirections.actionGlobalSettingsFragment())
+                    true
+                }
+                else -> false
+            }
         }
     }
 
-    internal fun setAboutButtonVisibility(value: Boolean) {
+    internal fun setMainMenuVisibility(value: Boolean) {
         if (value) {
-            addMenuProvider(aboutMenuButtonProvider)
+            addMenuProvider(mainMenuProvider)
         } else {
-            removeMenuProvider(aboutMenuButtonProvider)
+            removeMenuProvider(mainMenuProvider)
         }
     }
 
@@ -76,7 +84,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         super.onCreate(savedInstanceState)
         setupActionBarWithNavController(navController)
 
-        addMenuProvider(aboutMenuButtonProvider)
+        addMenuProvider(mainMenuProvider)
 
         converterViewModel.workWatcher.observe(this) {}
 
