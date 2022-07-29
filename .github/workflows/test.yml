@@ -67,12 +67,9 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
       - uses: android-actions/setup-android@v2
 
-      - run: pip install adbPullAs
+      - run: pip3 install adbPullAs
 
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2
