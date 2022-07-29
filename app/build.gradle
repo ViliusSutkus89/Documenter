@@ -28,6 +28,12 @@ android {
         // https://github.com/android/android-test/issues/1433
         // https://issuetracker.google.com/issues/78108767#comment12
         multiDexKeepProguard file('multidex.pro')
+
+        kapt {
+            arguments {
+                arg("room.schemaLocation", "$projectDir/schemas")
+            }
+        }
     }
     buildFeatures {
         viewBinding = true

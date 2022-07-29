@@ -24,7 +24,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [Document::class], version = 1, exportSchema = false)
+@Database(entities = [Document::class], version = 1, exportSchema = true)
 @TypeConverters(UriStringConverter::class, StateIntConverter::class)
 abstract class DocumentDatabase: RoomDatabase() {
     abstract fun documentDao(): DocumentDao
