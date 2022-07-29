@@ -39,7 +39,29 @@ env:
   applicationId: com.viliussutkus89.documenter
 
 jobs:
+  build:
+    runs-on: macos-11
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - run: ./gradlew build
+
+      # Needs to be tar'ed, because regular artifacts and caches take forever
+      - name: prepare app/build
+        run: tar -cf app-build.tar app/build
+
+      - name: artifact app/build
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-build.tar
+          path: app-build.tar
+
   test:
+    needs: build
     # Only macos VMs are available with exposed CPU extensions to run hardware accelerated emulator
     runs-on: macos-11
     strategy:
@@ -94,6 +116,13 @@ jobs:
       - run: tar -v -cf avd-cache.tar .android/adb* .android/avd/*
         working-directory: /Users/runner
         if: ${{ ! steps.avd-cache.outputs.cache-hit }}
+
+      - name: Download app/build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: app-build.tar
+      - run: tar -xf app-build.tar
+
       - run: pip3 install adbPullAs
 
       - name: Run tests
