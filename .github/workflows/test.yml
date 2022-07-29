@@ -39,7 +39,40 @@ env:
   applicationId: com.viliussutkus89.documenter
 
 jobs:
-  build:
+  releaseBuild:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Generate ephemeral keystore
+        run: keytool -genkey -noprompt -alias alias1 -dname "CN=$applicationId.ephemeral, OU=EphemeralSignatures, O=ViliusSutkus89.com, L=Kaunas, S=Kaunas, C=LT" -keystore $HOME/$applicationId.ephemeral.jks -keypass 123456 -keyalg RSA -keysize 4096 -validity 1 -storepass 123456
+
+      - run: ./gradlew assembleRelease lintRelease
+        env:
+          UNRELEASED_VERSION: true
+          SIGNING_KEYFILE: $HOME/$applicationId.ephemeral.jks
+          SIGNING_PASS: 123456
+          SIGNING_ALIAS: alias1
+
+      - name: artifact release builds
+        uses: actions/upload-artifact@v3
+        with:
+          name: APKs
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+
+      - name: Artifact lint report
+        uses: actions/upload-artifact@v3
+        with:
+          path: app/build/reports/lint-results-release.html
+          name: lintResults
+          if-no-files-found: error
+
+  debugBuild:
     runs-on: macos-11
     steps:
       - uses: actions/checkout@v3
@@ -48,7 +81,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - run: ./gradlew build lintRelease
+      - run: ./gradlew assembleDebug
 
       # Needs to be tarballed, because regular artifacts and caches take forever
       - name: prepare app/build
@@ -61,14 +94,8 @@ jobs:
           path: app-build.tar
           if-no-files-found: error
 
-      - name: Artifact lint report
-        uses: actions/upload-artifact@v3
-        with:
-          path: app/build/reports/lint-results-release.html
-          if-no-files-found: error
-
   test:
-    needs: build
+    needs: debugBuild
     # Only macos VMs are available with exposed CPU extensions to run hardware accelerated emulator
     runs-on: macos-11
     strategy:
