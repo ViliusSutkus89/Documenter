@@ -39,7 +39,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: android-actions/setup-android@v2
 
       - id: decodeKeystore
         run: |
