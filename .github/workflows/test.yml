@@ -68,6 +68,32 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: AVD (Android Virtual Device) Cache
+        uses: actions/cache@v3
+        id: avd-cache
+        with:
+          path: /Users/runner/avd-cache.tar
+          key: avd-${{ matrix.arch }}-${{ matrix.api-level }}-${{ matrix.api-type-target }}-${{ secrets.CACHE_KEY_SUFFIX }}
+
+      - run: tar -v -xf avd-cache.tar
+        if: steps.avd-cache.outputs.cache-hit
+        working-directory: /Users/runner
+
+      - name: Create AVD and generate snapshot
+        uses: reactivecircus/android-emulator-runner@v2
+        if: ${{ ! steps.avd-cache.outputs.cache-hit }}
+        with:
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          api-level: ${{ matrix.api-level }}
+          arch: ${{ matrix.arch }}
+          target: ${{ matrix.api-type-target }}
+          sdcard-path-or-size: 1G
+          disk-size: 8G
+          script: echo "Generated AVD snapshot for caching."
+
+      - run: tar -v -cf avd-cache.tar .android/adb* .android/avd/*
+        working-directory: /Users/runner
+        if: ${{ ! steps.avd-cache.outputs.cache-hit }}
       - run: pip3 install adbPullAs
 
       - name: Run tests
