@@ -53,7 +53,7 @@ jobs:
 
       - run: ./gradlew assembleRelease lintRelease -Ptest_build
         env:
-          SIGNING_KEYFILE: $applicationId.ephemeral.jks
+          SIGNING_KEYFILE: ${{env.applicationId}}.ephemeral.jks
           SIGNING_PASS: 123456
           SIGNING_ALIAS: alias1
 
