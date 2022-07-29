@@ -53,9 +53,9 @@
     <string name="error_share_failed">Failed to share converted document!</string>
 
     <string name="pre_kit_kat">
-        Android OS before KitKat 4.4 (API level 19) requires storage permission to open user files.<br/>\n<br/>\n
+        Android OS before KitKat 4.4 (API level 19) requires storage permission to open user files.<br />\n<br />\n
 
-        This application runs without such permissions.<br/>\n<br/>\n
+        This application runs without such permissions.<br />\n<br />\n
 
         Open files through a proper file manager and share to this application.
     </string>
