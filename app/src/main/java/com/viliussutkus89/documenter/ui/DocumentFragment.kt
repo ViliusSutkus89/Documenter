@@ -162,8 +162,6 @@ class DocumentFragment: Fragment() {
             viewModel.document.observeOnce(viewLifecycleOwner) { document ->
                 document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
                     val convertedUri = FileProvider.getUriForFile(requireContext(), requireContext().packageName + ".provider", htmlFile)
-                    binding.documentView.loadUrl(convertedUri.toString())
-
                     when(menuItem.itemId) {
                         R.id.open_with -> {
                             try {
