@@ -49,11 +49,11 @@ jobs:
           java-version: 17
 
       - name: Generate ephemeral keystore
-        run: keytool -genkey -noprompt -alias alias1 -dname "CN=$applicationId.ephemeral, OU=EphemeralSignatures, O=ViliusSutkus89.com, L=Kaunas, S=Kaunas, C=LT" -keystore $HOME/$applicationId.ephemeral.jks -keypass 123456 -keyalg RSA -keysize 4096 -validity 1 -storepass 123456
+        run: keytool -genkey -noprompt -alias alias1 -dname "CN=$applicationId.ephemeral, OU=EphemeralSignatures, O=ViliusSutkus89.com, L=Kaunas, S=Kaunas, C=LT" -keystore app/$applicationId.ephemeral.jks -keypass 123456 -keyalg RSA -keysize 4096 -validity 1 -storepass 123456
 
       - run: ./gradlew assembleRelease lintRelease -Ptest_build
         env:
-          SIGNING_KEYFILE: $HOME/$applicationId.ephemeral.jks
+          SIGNING_KEYFILE: $applicationId.ephemeral.jks
           SIGNING_PASS: 123456
           SIGNING_ALIAS: alias1
 
