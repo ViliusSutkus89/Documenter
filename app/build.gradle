@@ -17,6 +17,10 @@ android {
         versionCode 40
         versionName "1.0.4"
 
+        if (project.hasProperty('test_build')) {
+            versionName += '.unreleased'
+        }
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables.useSupportLibrary true
@@ -46,6 +50,9 @@ android {
         minifyEnabled true
         shrinkResources true
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    }
+    buildTypes.debug {
+        android.defaultConfig.versionName += '.debug'
     }
 
     packagingOptions {

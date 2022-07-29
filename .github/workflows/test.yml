@@ -51,7 +51,7 @@ jobs:
       - name: Generate ephemeral keystore
         run: keytool -genkey -noprompt -alias alias1 -dname "CN=$applicationId.ephemeral, OU=EphemeralSignatures, O=ViliusSutkus89.com, L=Kaunas, S=Kaunas, C=LT" -keystore $HOME/$applicationId.ephemeral.jks -keypass 123456 -keyalg RSA -keysize 4096 -validity 1 -storepass 123456
 
-      - run: ./gradlew assembleRelease lintRelease
+      - run: ./gradlew assembleRelease lintRelease -Ptest_build
         env:
           UNRELEASED_VERSION: true
           SIGNING_KEYFILE: $HOME/$applicationId.ephemeral.jks
@@ -81,7 +81,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - run: ./gradlew assembleDebug
+      - run: ./gradlew assembleDebug -Ptest_build
 
       # Needs to be tarballed, because regular artifacts and caches take forever
       - name: prepare app/build
