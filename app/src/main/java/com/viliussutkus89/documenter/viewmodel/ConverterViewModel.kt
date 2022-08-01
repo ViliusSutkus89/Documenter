@@ -43,6 +43,7 @@ private fun WorkInfo.getDocumentIdFun(): Long {
 class ConverterViewModel(application: Application, private val documentDao: DocumentDao) : AndroidViewModel(application) {
     companion object {
         val supportedMimeTypes = pdf2htmlEXWorker.SUPPORTED_MIME_TYPES + wvWareWorker.SUPPORTED_MIME_TYPES
+        private const val TAG = "ConverterViewModel"
     }
 
     class Factory(private val application: Application, private val documentDao: DocumentDao): ViewModelProvider.Factory {
@@ -121,7 +122,7 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
                 val convertedFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, convertedFilename)
                 wvWareWorker.oneTimeWorkRequestBuilder(cachedSourceFile, convertedFile, app)
             } else {
-                Log.e("HomeViewModel", "Failed to find appropriate worker. MIME Type='%s', URI='%s'".format(type, uri))
+                Log.e(TAG, "Failed to find appropriate worker. MIME Type='%s', Uri='%s'".format(type, uri))
                 documentDao.errorState(id = documentId)
                 return@launch
             }
