@@ -20,14 +20,18 @@ package com.viliussutkus89.documenter.background
 
 import android.content.Context
 import android.util.Log
-import androidx.work.Worker
-import androidx.work.WorkerParameters
+import androidx.work.*
 import java.io.File
 import java.io.IOException
 
 class CleanupCachedDocumentWorker(context: Context, params: WorkerParameters): Worker(context, params) {
     companion object {
         private const val TAG = "WorkerCleanup"
+
+        fun oneTimeWorkRequestBuilder(cachedFile: File): OneTimeWorkRequest.Builder {
+            return OneTimeWorkRequestBuilder<CleanupCachedDocumentWorker>()
+                .setInputData(workDataOf(DATA_KEY_CACHED_FILE to cachedFile.path))
+        }
     }
 
     private val cachedFile = File(inputData.getString(DATA_KEY_CACHED_FILE)

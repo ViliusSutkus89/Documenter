@@ -142,9 +142,8 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
             continuation = continuation.then(converterWorkRequest)
 
             continuation = continuation.then(
-                OneTimeWorkRequestBuilder<CleanupCachedDocumentWorker>()
-                .setInputData(workDataOf(DATA_KEY_CACHED_FILE to document.getCachedSourceFile(appCacheDir = app.cacheDir).path))
-                .build())
+                CleanupCachedDocumentWorker.oneTimeWorkRequestBuilder(cachedSourceFile).build()
+            )
 
             continuation.enqueue()
         }
