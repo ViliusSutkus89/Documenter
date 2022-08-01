@@ -37,7 +37,7 @@ private fun WorkInfo.getDocumentIdFun(): Long {
             return it.removePrefix("DocumentWork-").toLong()
         }
     }
-    return (-1).toLong()
+    return -1L
 }
 
 class ConverterViewModel(application: Application, private val documentDao: DocumentDao) : AndroidViewModel(application) {
@@ -63,7 +63,7 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
     val workWatcher: LiveData<Unit> = Transformations.map(documentWorkInfoList) { workInfoListUnfiltered ->
         viewModelScope.launch(Dispatchers.IO) {
             workInfoListUnfiltered.filter { workInfo ->
-                workInfo.documentId != (-1).toLong()
+                workInfo.documentId != -1L
             }.forEach { workInfo ->
                 if (workInfo.state == WorkInfo.State.FAILED) {
                     documentDao.errorState(workInfo.documentId)
