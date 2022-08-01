@@ -18,10 +18,14 @@
 
 package com.viliussutkus89.documenter.background
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.preference.PreferenceManager
+import androidx.work.Data
 import androidx.work.WorkerParameters
 import com.viliussutkus89.android.pdf2htmlex.pdf2htmlEX
+import com.viliussutkus89.documenter.model.Document
 import java.io.File
 import java.io.IOException
 
@@ -30,9 +34,9 @@ class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): ConverterWorkerC
 
     companion object {
         private const val TAG = "Workerpdf2htmlEX"
-        const val SETTING_KEY_OUTLINE = "setting_outline"
-        const val SETTING_KEY_DRM = "setting_drm"
-        const val SETTING_KEY_ANNOTATIONS = "setting_annotation"
+        private const val SETTING_KEY_OUTLINE = "setting_outline"
+        private const val SETTING_KEY_DRM = "setting_drm"
+        private const val SETTING_KEY_ANNOTATIONS = "setting_annotation"
 
         // https://filext.com/file-extension/PDF
         val SUPPORTED_MIME_TYPES = arrayOf(
@@ -45,6 +49,16 @@ class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): ConverterWorkerC
         )
 
         fun generateConvertedFileName(inputFilename: String): String = inputFilename.removeSuffix(".pdf") + ".html"
+
+        fun buildInputData(document: Document, application: Application): Data {
+            val preferences = PreferenceManager.getDefaultSharedPreferences(application)
+            return commonDataBuilder(document, application)
+                .putString(ARGUMENT_CLASS_NAME, RemoteWorkerService::class.java.name)
+                .putBoolean(SETTING_KEY_OUTLINE, preferences.getBoolean("pdf2htmlex_outline", true))
+                .putBoolean(SETTING_KEY_DRM, preferences.getBoolean("pdf2htmlex_drm", true))
+                .putBoolean(SETTING_KEY_ANNOTATIONS, preferences.getBoolean("pdf2htmlex_annotations", true))
+                .build()
+        }
     }
 
     override fun doWorkSync(inputFile: File): File? {

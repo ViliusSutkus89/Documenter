@@ -22,9 +22,7 @@ import android.app.Application
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.*
-import androidx.preference.PreferenceManager
 import androidx.work.*
-import androidx.work.multiprocess.RemoteListenableWorker
 import com.viliussutkus89.documenter.background.*
 import com.viliussutkus89.documenter.model.*
 import com.viliussutkus89.documenter.utils.getFilename
@@ -116,53 +114,30 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
 
             val type = uri.getMimeType(app.contentResolver)
 
-            val preferences = PreferenceManager.getDefaultSharedPreferences(app)
-
-            val converterWorkRequest = if (pdf2htmlEXWorker.SUPPORTED_MIME_TYPES.contains(type)) {
+            val converterWorkRequestBuilder = if (pdf2htmlEXWorker.SUPPORTED_MIME_TYPES.contains(type)) {
                 documentDao.updateConvertedFilename(documentId, pdf2htmlEXWorker.generateConvertedFileName(document.filename))
                 document = documentDao.getDocument(documentId)
 
                 OneTimeWorkRequestBuilder<pdf2htmlEXWorker>()
-                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .setInputData(workDataOf(
-                        RemoteListenableWorker.ARGUMENT_PACKAGE_NAME to app.packageName,
-                        RemoteListenableWorker.ARGUMENT_CLASS_NAME to pdf2htmlEXWorker.RemoteWorkerService::class.java.name,
+                    .setInputData(pdf2htmlEXWorker.buildInputData(document, app))
 
-                        pdf2htmlEXWorker.SETTING_KEY_OUTLINE to preferences.getBoolean("pdf2htmlex_outline", true),
-                        pdf2htmlEXWorker.SETTING_KEY_DRM to preferences.getBoolean("pdf2htmlex_drm", true),
-                        pdf2htmlEXWorker.SETTING_KEY_ANNOTATIONS to preferences.getBoolean("pdf2htmlex_annotations", true),
-
-                        DATA_KEY_CACHED_FILE to document.getCachedSourceFile(appCacheDir = app.cacheDir).path,
-                        DATA_KEY_CONVERTED_FILE to document.getConvertedHtmlFile(appFilesDir = app.filesDir)!!.path
-                    ))
-                    .addTag("DocumentWork")
-                    .addTag("DocumentWork-${documentId}")
-                    .addTag("ConvertWork")
-                    .build()
             } else if (wvWareWorker.SUPPORTED_MIME_TYPES.contains(type)) {
                 documentDao.updateConvertedFilename(documentId, wvWareWorker.generateConvertedFileName(document.filename))
                 document = documentDao.getDocument(documentId)
-
                 OneTimeWorkRequestBuilder<wvWareWorker>()
-                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .setInputData(workDataOf(
-                        RemoteListenableWorker.ARGUMENT_PACKAGE_NAME to app.packageName,
-                        RemoteListenableWorker.ARGUMENT_CLASS_NAME to wvWareWorker.RemoteWorkerService::class.java.name,
-
-                        wvWareWorker.SETTING_KEY_NO_GRAPHICS to preferences.getBoolean("wvware_nographics", true),
-
-                        DATA_KEY_CACHED_FILE to document.getCachedSourceFile(appCacheDir = app.cacheDir).path,
-                        DATA_KEY_CONVERTED_FILE to document.getConvertedHtmlFile(appFilesDir = app.filesDir)!!.path
-                    ))
-                    .addTag("DocumentWork")
-                    .addTag("DocumentWork-${documentId}")
-                    .addTag("ConvertWork")
-                    .build()
+                    .setInputData(wvWareWorker.buildInputData(document, app))
             } else {
                 Log.e("HomeViewModel", "Failed to find appropriate worker. MIME Type='%s', URI='%s'".format(type, uri))
                 documentDao.errorState(id = documentId)
                 return@launch
             }
+
+            val converterWorkRequest = converterWorkRequestBuilder
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .addTag("DocumentWork")
+                .addTag("DocumentWork-${document.id}")
+                .addTag("ConvertWork")
+                .build()
 
             continuation = continuation.then(converterWorkRequest)
 

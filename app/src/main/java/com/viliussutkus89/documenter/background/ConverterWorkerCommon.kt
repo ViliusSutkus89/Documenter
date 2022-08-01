@@ -18,6 +18,7 @@
 
 package com.viliussutkus89.documenter.background
 
+import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
@@ -25,11 +26,15 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.app.NotificationCompat
+import androidx.work.Data
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.multiprocess.RemoteListenableWorker
 import com.google.common.util.concurrent.ListenableFuture
 import com.viliussutkus89.documenter.R
+import com.viliussutkus89.documenter.model.Document
+import com.viliussutkus89.documenter.model.getCachedSourceFile
+import com.viliussutkus89.documenter.model.getConvertedHtmlFile
 import java.io.File
 
 abstract class ConverterWorkerCommon(ctx: Context, params: WorkerParameters): RemoteListenableWorker(ctx, params) {
@@ -58,6 +63,14 @@ abstract class ConverterWorkerCommon(ctx: Context, params: WorkerParameters): Re
                 .setSmallIcon(R.drawable.ic_photo_filter)
                 .setOngoing(true)
                 .build()
+        }
+
+        @JvmStatic
+        protected fun commonDataBuilder(document: Document, application: Application): Data.Builder {
+            return Data.Builder()
+                .putString(ARGUMENT_PACKAGE_NAME, application.packageName)
+                .putString(DATA_KEY_CACHED_FILE, document.getCachedSourceFile(appCacheDir = application.cacheDir).path)
+                .putString(DATA_KEY_CONVERTED_FILE, document.getConvertedHtmlFile(appFilesDir = application.filesDir)!!.path)
         }
     }
 
