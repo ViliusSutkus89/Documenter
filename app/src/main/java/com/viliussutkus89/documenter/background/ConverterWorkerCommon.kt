@@ -32,9 +32,6 @@ import androidx.work.WorkerParameters
 import androidx.work.multiprocess.RemoteListenableWorker
 import com.google.common.util.concurrent.ListenableFuture
 import com.viliussutkus89.documenter.R
-import com.viliussutkus89.documenter.model.Document
-import com.viliussutkus89.documenter.model.getCachedSourceFile
-import com.viliussutkus89.documenter.model.getConvertedHtmlFile
 import java.io.File
 
 abstract class ConverterWorkerCommon(ctx: Context, params: WorkerParameters): RemoteListenableWorker(ctx, params) {
@@ -66,11 +63,11 @@ abstract class ConverterWorkerCommon(ctx: Context, params: WorkerParameters): Re
         }
 
         @JvmStatic
-        protected fun commonDataBuilder(document: Document, application: Application): Data.Builder {
+        protected fun commonDataBuilder(cachedSourceFile: File, convertedHtmlFile: File, packageName: String): Data.Builder {
             return Data.Builder()
-                .putString(ARGUMENT_PACKAGE_NAME, application.packageName)
-                .putString(DATA_KEY_CACHED_FILE, document.getCachedSourceFile(appCacheDir = application.cacheDir).path)
-                .putString(DATA_KEY_CONVERTED_FILE, document.getConvertedHtmlFile(appFilesDir = application.filesDir)!!.path)
+                .putString(ARGUMENT_PACKAGE_NAME, packageName)
+                .putString(DATA_KEY_CACHED_FILE, cachedSourceFile.path)
+                .putString(DATA_KEY_CONVERTED_FILE, convertedHtmlFile.path)
         }
     }
 

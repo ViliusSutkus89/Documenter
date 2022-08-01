@@ -18,14 +18,13 @@
 
 package com.viliussutkus89.documenter.background
 
-import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.preference.PreferenceManager
-import androidx.work.Data
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkerParameters
 import com.viliussutkus89.android.pdf2htmlex.pdf2htmlEX
-import com.viliussutkus89.documenter.model.Document
 import java.io.File
 import java.io.IOException
 
@@ -50,14 +49,18 @@ class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): ConverterWorkerC
 
         fun generateConvertedFileName(inputFilename: String): String = inputFilename.removeSuffix(".pdf") + ".html"
 
-        fun buildInputData(document: Document, application: Application): Data {
-            val preferences = PreferenceManager.getDefaultSharedPreferences(application)
-            return commonDataBuilder(document, application)
-                .putString(ARGUMENT_CLASS_NAME, RemoteWorkerService::class.java.name)
-                .putBoolean(SETTING_KEY_OUTLINE, preferences.getBoolean("pdf2htmlex_outline", true))
-                .putBoolean(SETTING_KEY_DRM, preferences.getBoolean("pdf2htmlex_drm", true))
-                .putBoolean(SETTING_KEY_ANNOTATIONS, preferences.getBoolean("pdf2htmlex_annotations", true))
-                .build()
+        fun oneTimeWorkRequestBuilder(cachedSourceFile: File, convertedHtmlFile: File, context: Context): OneTimeWorkRequest.Builder {
+            val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+            return OneTimeWorkRequestBuilder<pdf2htmlEXWorker>()
+                .setInputData(
+                    commonDataBuilder(cachedSourceFile, convertedHtmlFile, context.packageName)
+                        .putString(ARGUMENT_CLASS_NAME, RemoteWorkerService::class.java.name)
+                        .putBoolean(SETTING_KEY_OUTLINE, preferences.getBoolean("pdf2htmlex_outline", true))
+                        .putBoolean(SETTING_KEY_DRM, preferences.getBoolean("pdf2htmlex_drm", true))
+                        .putBoolean(SETTING_KEY_ANNOTATIONS, preferences.getBoolean("pdf2htmlex_annotations", true))
+                        .build()
+                )
+                .addTag("ConvertWork")
         }
     }
 

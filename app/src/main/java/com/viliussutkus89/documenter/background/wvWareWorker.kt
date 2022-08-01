@@ -18,14 +18,13 @@
 
 package com.viliussutkus89.documenter.background
 
-import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.preference.PreferenceManager
-import androidx.work.Data
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkerParameters
 import com.viliussutkus89.android.wvware.wvWare
-import com.viliussutkus89.documenter.model.Document
 import java.io.File
 import java.io.IOException
 
@@ -33,7 +32,7 @@ class wvWareWorker(ctx: Context, params: WorkerParameters): ConverterWorkerCommo
     class RemoteWorkerService : androidx.work.multiprocess.RemoteWorkerService()
 
     companion object {
-        private val TAG = "WorkerwvWare"
+        private const val TAG = "WorkerwvWare"
         private const val SETTING_KEY_NO_GRAPHICS = "setting_nographics"
 
         // https://filext.com/file-extension/DOC
@@ -51,12 +50,16 @@ class wvWareWorker(ctx: Context, params: WorkerParameters): ConverterWorkerCommo
 
         fun generateConvertedFileName(inputFilename: String): String = inputFilename.removeSuffix(".doc") + ".html"
 
-        fun buildInputData(document: Document, application: Application): Data {
-            val preferences = PreferenceManager.getDefaultSharedPreferences(application)
-            return commonDataBuilder(document, application)
-                .putString(ARGUMENT_CLASS_NAME, RemoteWorkerService::class.java.name)
-                .putBoolean(SETTING_KEY_NO_GRAPHICS, preferences.getBoolean("wvware_nographics", true))
-                .build()
+        fun oneTimeWorkRequestBuilder(cachedSourceFile: File, convertedHtmlFile: File, context: Context): OneTimeWorkRequest.Builder {
+            val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+            return OneTimeWorkRequestBuilder<wvWareWorker>()
+                .setInputData(
+                    commonDataBuilder(cachedSourceFile, convertedHtmlFile, context.packageName)
+                        .putString(ARGUMENT_CLASS_NAME, RemoteWorkerService::class.java.name)
+                        .putBoolean(SETTING_KEY_NO_GRAPHICS, preferences.getBoolean("wvware_nographics", true))
+                        .build()
+                )
+                .addTag("ConvertWork")
         }
     }
 

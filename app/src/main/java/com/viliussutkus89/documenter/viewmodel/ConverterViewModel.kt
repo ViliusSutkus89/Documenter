@@ -111,17 +111,15 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
             val type = uri.getMimeType(app.contentResolver)
 
             val converterWorkRequestBuilder = if (pdf2htmlEXWorker.SUPPORTED_MIME_TYPES.contains(type)) {
-                documentDao.updateConvertedFilename(documentId, pdf2htmlEXWorker.generateConvertedFileName(document.filename))
-                document = documentDao.getDocument(documentId)
-
-                OneTimeWorkRequestBuilder<pdf2htmlEXWorker>()
-                    .setInputData(pdf2htmlEXWorker.buildInputData(document, app))
-
+                val convertedFilename = pdf2htmlEXWorker.generateConvertedFileName(document.filename)
+                documentDao.updateConvertedFilename(documentId, convertedFilename)
+                val convertedFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, convertedFilename)
+                pdf2htmlEXWorker.oneTimeWorkRequestBuilder(cachedSourceFile, convertedFile, app)
             } else if (wvWareWorker.SUPPORTED_MIME_TYPES.contains(type)) {
-                documentDao.updateConvertedFilename(documentId, wvWareWorker.generateConvertedFileName(document.filename))
-                document = documentDao.getDocument(documentId)
-                OneTimeWorkRequestBuilder<wvWareWorker>()
-                    .setInputData(wvWareWorker.buildInputData(document, app))
+                val convertedFilename = wvWareWorker.generateConvertedFileName(document.filename)
+                documentDao.updateConvertedFilename(documentId, convertedFilename)
+                val convertedFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, convertedFilename)
+                wvWareWorker.oneTimeWorkRequestBuilder(cachedSourceFile, convertedFile, app)
             } else {
                 Log.e("HomeViewModel", "Failed to find appropriate worker. MIME Type='%s', URI='%s'".format(type, uri))
                 documentDao.errorState(id = documentId)
