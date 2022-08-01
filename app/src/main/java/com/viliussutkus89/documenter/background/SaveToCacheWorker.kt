@@ -24,9 +24,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.work.*
 import androidx.annotation.RequiresApi
-import androidx.work.Worker
-import androidx.work.WorkerParameters
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -34,6 +33,18 @@ import java.io.IOException
 class SaveToCacheWorker(context: Context, params: WorkerParameters): Worker(context, params) {
     companion object {
         private const val TAG = "WorkerSaveToCache"
+        private const val workTag = "SaveToCacheWork"
+
+        fun oneTimeWorkRequestBuilder(sourceUri: Uri, cachedFile: File): OneTimeWorkRequest.Builder {
+            return OneTimeWorkRequestBuilder<SaveToCacheWorker>()
+                .addTag(workTag)
+                .setInputData(
+                    workDataOf(
+                        DATA_KEY_INPUT_URI to sourceUri.toString(),
+                        DATA_KEY_CACHED_FILE to cachedFile.path
+                    )
+                )
+        }
     }
 
     private val inputUri = Uri.parse(inputData.getString(DATA_KEY_INPUT_URI)

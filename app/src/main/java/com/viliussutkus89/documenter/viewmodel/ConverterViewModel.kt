@@ -100,13 +100,9 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
             document.getCachedDir(appCacheDir = app.cacheDir).mkdirs()
             document.getFilesDir(appFilesDir = app.filesDir).mkdirs()
 
-            val saveToCacheWorkRequest = OneTimeWorkRequestBuilder<SaveToCacheWorker>()
-                .setInputData(workDataOf(
-                    DATA_KEY_INPUT_URI to uri.toString(),
-                    DATA_KEY_CACHED_FILE to document.getCachedSourceFile(appCacheDir = app.cacheDir).path
-                ))
-                .addTag("DocumentWork")
-                .addTag("DocumentWork-${documentId}")
+            val cachedSourceFile = getCachedSourceFile(appCacheDir = app.cacheDir, document.id, document.filename)
+            val saveToCacheWorkRequest = SaveToCacheWorker.oneTimeWorkRequestBuilder(document.sourceUri, cachedSourceFile)
+                .addTag("DocumentWork-${document.id}")
                 .addTag("SaveToCacheWork")
                 .build()
 

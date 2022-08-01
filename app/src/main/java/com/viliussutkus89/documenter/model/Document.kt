@@ -133,3 +133,9 @@ fun Document.getThumbnailFile(appCacheDir: File): File? {
         File(documentDir, "screenshot.png")
     } else null
 }
+
+fun getCachedSourceFile(appCacheDir: File, documentId: Long, filename: String): File {
+    val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
+    val documentDir = File(cacheDir, documentId.toString())
+    return File(documentDir, filename)
+}
