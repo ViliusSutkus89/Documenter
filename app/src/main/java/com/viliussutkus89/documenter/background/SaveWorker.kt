@@ -23,30 +23,36 @@ package com.viliussutkus89.documenter.background;
 
 import android.content.Context
 import android.net.Uri
-import androidx.work.Worker
-import androidx.work.WorkerParameters
+import androidx.work.*
 import java.io.IOException
 
 class SaveWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     companion object {
-        const val INPUT_KEY_INPUT_URI = "INPUT_KEY_INPUT_URI"
-        const val INPUT_KEY_OUTPUT_URI = "INPUT_KEY_OUTPUT_URI"
+        private const val INPUT_KEY_INPUT_URI = "INPUT_KEY_INPUT_URI"
+        private const val INPUT_KEY_OUTPUT_URI = "INPUT_KEY_OUTPUT_URI"
+
+        fun oneTimeWorkRequestBuilder(input: Uri, output: Uri): OneTimeWorkRequest.Builder {
+            return OneTimeWorkRequestBuilder<SaveWorker>()
+                .setInputData(
+                    workDataOf(
+                        INPUT_KEY_INPUT_URI to input.toString(),
+                        INPUT_KEY_OUTPUT_URI to output.toString()
+                    )
+                )
+        }
     }
 
+    private val input = Uri.parse(inputData.getString(INPUT_KEY_INPUT_URI)
+        ?: throw IllegalArgumentException("INPUT_KEY_INPUT_URI is null"))
+
+    private val output = Uri.parse(inputData.getString(INPUT_KEY_OUTPUT_URI)
+        ?: throw IllegalArgumentException("INPUT_KEY_OUTPUT_URI is null"))
+
     override fun doWork(): Result {
-        val inputUriStr = inputData.getString(INPUT_KEY_INPUT_URI)
-        val outputUriStr = inputData.getString(INPUT_KEY_OUTPUT_URI)
-        if (null == inputUriStr || null == outputUriStr) {
-            return Result.failure()
-        }
-
-        val inputUri = Uri.parse(inputUriStr)
-        val outputUri = Uri.parse(outputUriStr)
-
         val contentResolver = applicationContext.contentResolver
         try {
-            contentResolver.openInputStream(inputUri).use { inputStream ->
-                contentResolver.openOutputStream(outputUri).use { outputStream ->
+            contentResolver.openInputStream(input).use { inputStream ->
+                contentResolver.openOutputStream(output).use { outputStream ->
                     val readBufferSize = 2048
                     val buffer = ByteArray(readBufferSize)
                     var didRead: Int

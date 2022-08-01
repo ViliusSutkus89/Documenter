@@ -56,7 +56,7 @@ class DocumentFragment: Fragment() {
 
     private val viewModel: DocumentViewModel by viewModels {
         val app = requireActivity().application as DocumenterApplication
-        DocumentViewModel.Factory(args.documentId, app.documentDatabase.documentDao())
+        DocumentViewModel.Factory(args.documentId, app.documentDatabase.documentDao(), requireContext())
     }
 
     override fun onCreateView(
@@ -136,7 +136,7 @@ class DocumentFragment: Fragment() {
                 viewModel.document.observeOnce(viewLifecycleOwner) { document ->
                     registerForActivityResult<String, Uri>(ActivityResultContracts.CreateDocument("text/html")) {
                         it?.let {
-                            viewModel.saveDocument(it, requireContext())
+                            viewModel.saveDocument(it)
                         }
                     }.launch(document.convertedFilename)
                 }

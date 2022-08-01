@@ -41,18 +41,26 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.*
 
-class DocumentViewModel(private val documentId: Long, private val documentDao: DocumentDao) : ViewModel() {
-    class Factory(private val documentId: Long, private val documentDao: DocumentDao): ViewModelProvider.Factory {
+class DocumentViewModel(private val documentId: Long, private val documentDao: DocumentDao, context: Context) : ViewModel() {
+    class Factory(
+        private val documentId: Long,
+        private val documentDao: DocumentDao,
+        private val context: Context
+    ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(DocumentViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return DocumentViewModel(documentId, documentDao) as T
+                return DocumentViewModel(documentId, documentDao, context) as T
             }
             throw IllegalArgumentException("Unable to construct DocumentViewModel")
         }
     }
 
     val document = documentDao.getFilenameConvertedFilename(documentId).asLiveData()
+
+    val htmlFile: LiveData<File> = Transformations.map(document) {
+        getConvertedHtmlFile(appFilesDir = context.filesDir, it.id, it.convertedFilename!!)
+    }
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -70,12 +78,11 @@ class DocumentViewModel(private val documentId: Long, private val documentDao: D
         }
     }
 
-    fun saveDocument(destinationUri: Uri, context: Context) {
-        val convertedFile = (document.value as DocumentScoped_Filename_ConvertedFilename).getConvertedHtmlFile(appFilesDir = context.filesDir)!!
-        WorkManager.getInstance(context).beginUniqueWork("saveDocument-${documentId}", ExistingWorkPolicy.REPLACE,
-            OneTimeWorkRequestBuilder<SaveWorker>().setInputData(workDataOf(
-                SaveWorker.INPUT_KEY_INPUT_URI to convertedFile.toUri().toString(),
-                SaveWorker.INPUT_KEY_OUTPUT_URI to destinationUri.toString()
-            )).build()).enqueue()
+    fun saveDocument(destinationUri: Uri) {
+        workManager.beginUniqueWork(
+            "saveDocument-${documentId}",
+            ExistingWorkPolicy.REPLACE,
+            SaveWorker.oneTimeWorkRequestBuilder(htmlFile.value!!.toUri(), destinationUri).build()
+        ).enqueue()
     }
 }
