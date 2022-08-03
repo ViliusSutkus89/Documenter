@@ -30,6 +30,8 @@ import android.view.*
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import androidx.core.content.FileProvider
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -43,6 +45,7 @@ import com.viliussutkus89.documenter.databinding.FragmentDocumentBinding
 import com.viliussutkus89.documenter.model.getConvertedHtmlFile
 import com.viliussutkus89.documenter.utils.observeOnce
 import com.viliussutkus89.documenter.viewmodel.DocumentViewModel
+import java.io.File
 
 class DocumentFragment: Fragment() {
     companion object {
@@ -57,6 +60,11 @@ class DocumentFragment: Fragment() {
     private val viewModel: DocumentViewModel by viewModels {
         val app = requireActivity().application as DocumenterApplication
         DocumentViewModel.Factory(args.documentId, app.documentDatabase.documentDao(), requireContext())
+    }
+
+    private fun getFileUri(file: File): Uri {
+        val ctx = requireContext()
+        return FileProvider.getUriForFile(ctx, ctx.packageName + ".provider", file)
     }
 
     override fun onCreateView(
@@ -126,28 +134,13 @@ class DocumentFragment: Fragment() {
         outState.putBundle(BUNDLE_KEY_DOCUMENT_VIEW, documentViewBundle)
     }
 
-    private val saveMenu = object: MenuProvider {
-        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-            menuInflater.inflate(R.menu.document_menu_save, menu)
-        }
-
-        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-            return if (menuItem.itemId == R.id.save) {
-                viewModel.document.observeOnce(viewLifecycleOwner) { document ->
-                    registerForActivityResult<String, Uri>(ActivityResultContracts.CreateDocument("text/html")) {
-                        it?.let {
-                            viewModel.saveDocument(it)
-                        }
-                    }.launch(document.convertedFilename)
-                }
-                true
-            } else false
-        }
-    }
-
     private val documentMenu = object: MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.document_menu, menu)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                menu.findItem(R.id.save).isVisible = false
+            }
+
             // Workaround for Issue #7
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
                 menu.findItem(R.id.open_with).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
@@ -155,39 +148,86 @@ class DocumentFragment: Fragment() {
             }
         }
 
-        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-            if (!listOf(R.id.open_with, R.id.share).contains(menuItem.itemId)) {
-                return false
+        private fun showSnackBar(@StringRes resId: Int) {
+            Snackbar.make(binding.root, resId, Snackbar.LENGTH_LONG).show()
+        }
+
+        @RequiresApi(Build.VERSION_CODES.KITKAT)
+        private fun save() {
+            documentViewModel.document.observeOnce(viewLifecycleOwner) { document ->
+                registerForActivityResult<String, Uri>(ActivityResultContracts.CreateDocument("text/html")) {
+                    it?.let {
+                        documentViewModel.saveDocument(it)
+                    }
+                }.launch(document.convertedFilename)
             }
+        }
+
+        private fun openWith() {
             viewModel.document.observeOnce(viewLifecycleOwner) { document ->
                 document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
-                    val convertedUri = FileProvider.getUriForFile(requireContext(), requireContext().packageName + ".provider", htmlFile)
-                    when(menuItem.itemId) {
-                        R.id.open_with -> {
-                            try {
-                                startActivity(Intent(Intent.ACTION_VIEW, convertedUri)
-                                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
-                            } catch (e: ActivityNotFoundException) {
-                                e.printStackTrace()
-                                Snackbar.make(binding.root, R.string.error_open_with_failed, Snackbar.LENGTH_LONG).show()
-                            }
-                        }
-                        R.id.share -> {
-                            try {
-                                startActivity(Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/html"
-                                    putExtra(Intent.EXTRA_STREAM, convertedUri)
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                })
-                            } catch (e: ActivityNotFoundException) {
-                                e.printStackTrace()
-                                Snackbar.make(binding.root, R.string.error_share_failed, Snackbar.LENGTH_LONG).show()
-                            }
-                        }
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, getFileUri(htmlFile))
+                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
+                    } catch (e: ActivityNotFoundException) {
+                        e.printStackTrace()
+                        showSnackBar(R.string.error_open_with_failed)
                     }
                 }
             }
-            return true
+        }
+
+        private fun share() {
+            documentViewModel.htmlFile.observeOnce(viewLifecycleOwner) { htmlFile ->
+                try {
+                    startActivity(Intent(Intent.ACTION_SEND).apply {
+                        type = "text/html"
+                        putExtra(Intent.EXTRA_STREAM, getFileUri(htmlFile))
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    })
+                } catch (e: ActivityNotFoundException) {
+                    e.printStackTrace()
+                    showSnackBar(R.string.error_share_failed)
+                }
+            }
+
+
+            viewModel.document.observeOnce(viewLifecycleOwner) { document ->
+                document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
+                    try {
+                        startActivity(Intent(Intent.ACTION_SEND).apply {
+                            type = "text/html"
+                            putExtra(Intent.EXTRA_STREAM, getFileUri(htmlFile))
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        })
+                    } catch (e: ActivityNotFoundException) {
+                        e.printStackTrace()
+                        showSnackBar(R.string.error_share_failed)
+                    }
+                }
+            }
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+            return when(menuItem.itemId) {
+                R.id.save -> {
+                    // Pre KitKat will not reach this code, because menu item is hidden for pre KitKat
+                    // Added the check anyways, to reassure linter
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        save()
+                    }
+                    true
+                }
+                R.id.open_with -> {
+                    openWith()
+                    true
+                }
+                R.id.share -> {
+                    share()
+                    true
+                }
+                else -> false
+            }
         }
     }
 }
