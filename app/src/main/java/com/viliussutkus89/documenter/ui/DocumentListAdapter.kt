@@ -20,16 +20,13 @@ package com.viliussutkus89.documenter.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.net.toUri
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.databinding.ListItemDocumentBinding
 import com.viliussutkus89.documenter.model.Document
-import com.viliussutkus89.documenter.model.State
-import com.viliussutkus89.documenter.model.getScreenshotFile
 import java.io.File
+
 
 class DocumentListAdapter(
     private val appCacheDir: File,
@@ -37,24 +34,8 @@ class DocumentListAdapter(
     private val removeListener: (Document) -> Unit
 ): ListAdapter<Document, DocumentListAdapter.DocumentViewHolder>(DiffCallback) {
 
-    class DocumentViewHolder(private val binding: ListItemDocumentBinding): RecyclerView.ViewHolder(binding.root) {
-        fun bind(doc: Document, appCacheDir: File, openListener: (Document) -> Unit, removeListener: (Document) -> Unit) {
-            binding.apply {
-                document = doc
-                this.appCacheDir = appCacheDir
-                thumbnail.setOnClickListener {
-                    openListener(doc)
-                }
-                filename.setOnClickListener {
-                    openListener(doc)
-                }
-                removeButton.setOnClickListener {
-                    removeListener(doc)
-                }
-                executePendingBindings()
-            }
-        }
-    }
+    class DocumentViewHolder(internal val binding: ListItemDocumentBinding)
+        : RecyclerView.ViewHolder(binding.root)
 
     companion object DiffCallback: DiffUtil.ItemCallback<Document>() {
         override fun areItemsTheSame(oldItem: Document, newItem: Document): Boolean {
@@ -71,6 +52,21 @@ class DocumentListAdapter(
         return DocumentViewHolder(listItemBinding)
     }
 
-    override fun onBindViewHolder(holder: DocumentViewHolder, position: Int) =
-        holder.bind(getItem(position), appCacheDir, openListener, removeListener)
+    override fun onBindViewHolder(holder: DocumentViewHolder, position: Int) {
+        val doc = getItem(position)
+        holder.binding.appCacheDir = appCacheDir
+        holder.binding.apply {
+            document = doc
+            thumbnail.setOnClickListener {
+                openListener(doc)
+            }
+            filename.setOnClickListener {
+                openListener(doc)
+            }
+            removeButton.setOnClickListener {
+                removeListener(doc)
+            }
+            executePendingBindings()
+        }
+    }
 }
