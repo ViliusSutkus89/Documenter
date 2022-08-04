@@ -60,15 +60,9 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
     private val documentDao = app.documentDatabase.documentDao()
     private val workManager get() = WorkManager.getInstance(app)
 
-    private val WorkInfo.documentId: Long get() = getDocumentIdFun()
-    private fun WorkInfo.getDocumentIdFun(): Long {
-        tags.forEach {
-            if (it.startsWith("DocumentWork-")) {
-                return it.removePrefix("DocumentWork-").toLong()
-            }
-        }
-        return -1L
-    }
+    private val WorkInfo.documentId: Long
+        get() = tags.find { it.startsWith("DocumentWork-") }?.removePrefix("DocumentWork-")
+            ?.toLong() ?: -1L
 
     private val documentWorkInfoList: LiveData<List<WorkInfo>> = workManager.getWorkInfosByTagLiveData("DocumentWork")
     val workWatcher: LiveData<Unit> = Transformations.map(documentWorkInfoList) { workInfoListUnfiltered ->
