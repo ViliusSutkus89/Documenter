@@ -34,12 +34,16 @@ fun setDocumentThumbnail(imageView: ImageView, document: Document, appCacheDir: 
         imageView.setImageURI(it.toUri())
     } ?: run {
         imageView.setImageResource(
-            if (document.state == State.Converted) {
-                R.drawable.ic_folder_open
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                R.drawable.loading_animation
-            } else {
-                R.drawable.loading_img
+            when (document.state) {
+                State.Converted -> R.drawable.ic_folder_open
+                State.Error -> R.drawable.ic_baseline_error_outline_24
+                else -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        R.drawable.loading_animation
+                    } else {
+                        R.drawable.loading_img
+                    }
+                }
             }
         )
     }
