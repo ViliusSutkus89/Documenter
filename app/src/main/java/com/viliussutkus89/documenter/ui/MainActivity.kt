@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private val converterViewModel: ConverterViewModel by viewModels {
         val app = application as DocumenterApplication
-        ConverterViewModel.Factory(app, app.documentDatabase.documentDao())
+        ConverterViewModel.Factory(app)
     }
 
     private val mainMenuProvider = object: MenuProvider {

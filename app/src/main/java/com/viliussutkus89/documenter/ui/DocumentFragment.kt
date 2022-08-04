@@ -59,7 +59,7 @@ class DocumentFragment: Fragment() {
 
     private val viewModel: DocumentViewModel by viewModels {
         val app = requireActivity().application as DocumenterApplication
-        DocumentViewModel.Factory(args.documentId, app.documentDatabase.documentDao(), requireContext())
+        DocumentViewModel.Factory(app, args.documentId)
     }
 
     private fun getFileUri(file: File): Uri {

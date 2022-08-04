@@ -37,8 +37,8 @@ import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.PreKitKatFragmentDirections
 import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.databinding.FragmentHomeBinding
-import com.viliussutkus89.documenter.viewmodel.HomeViewModel
 import com.viliussutkus89.documenter.viewmodel.ConverterViewModel
+import com.viliussutkus89.documenter.viewmodel.HomeViewModel
 
 class HomeFragment: Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -49,7 +49,7 @@ class HomeFragment: Fragment() {
         HomeViewModel.Factory(app.documentDatabase.documentDao())
     }
     private val converterViewModel: ConverterViewModel by activityViewModels {
-        ConverterViewModel.Factory(app, app.documentDatabase.documentDao())
+        ConverterViewModel.Factory(app)
     }
 
     private val openDocument = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

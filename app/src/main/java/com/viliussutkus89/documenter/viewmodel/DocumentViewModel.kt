@@ -29,6 +29,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.viliussutkus89.documenter.DocumenterApplication
 import androidx.work.workDataOf
 import com.viliussutkus89.documenter.background.SaveWorker
 import com.viliussutkus89.documenter.model.DocumentDao
@@ -41,21 +42,22 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.*
 
-class DocumentViewModel(private val documentId: Long, private val documentDao: DocumentDao, context: Context) : ViewModel() {
+
+class DocumentViewModel(private val app: DocumenterApplication, private val documentId: Long) : AndroidViewModel(app) {
     class Factory(
-        private val documentId: Long,
-        private val documentDao: DocumentDao,
-        private val context: Context
+        private val application: DocumenterApplication,
+        private val documentId: Long
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(DocumentViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return DocumentViewModel(documentId, documentDao, context) as T
+                return DocumentViewModel(application, documentId) as T
             }
             throw IllegalArgumentException("Unable to construct DocumentViewModel")
         }
     }
 
+    private val documentDao = app.documentDatabase.documentDao()
     val document = documentDao.getFilenameConvertedFilename(documentId).asLiveData()
 
     val htmlFile: LiveData<File> = Transformations.map(document) {
@@ -79,7 +81,7 @@ class DocumentViewModel(private val documentId: Long, private val documentDao: D
     }
 
     fun saveDocument(destinationUri: Uri) {
-        workManager.beginUniqueWork(
+        WorkManager.getInstance(app).beginUniqueWork(
             "saveDocument-${documentId}",
             ExistingWorkPolicy.REPLACE,
             SaveWorker.oneTimeWorkRequestBuilder(htmlFile.value!!.toUri(), destinationUri).build()

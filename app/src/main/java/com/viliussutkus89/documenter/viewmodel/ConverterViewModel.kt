@@ -31,24 +31,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-class ConverterViewModel(application: Application, private val documentDao: DocumentDao) : AndroidViewModel(application) {
+class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewModel(app) {
     companion object {
         val supportedMimeTypes = pdf2htmlEXWorker.SUPPORTED_MIME_TYPES + wvWareWorker.SUPPORTED_MIME_TYPES
         private const val TAG = "ConverterViewModel"
     }
 
-    class Factory(private val application: Application, private val documentDao: DocumentDao): ViewModelProvider.Factory {
+    class Factory(private val application: DocumenterApplication): ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(ConverterViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return ConverterViewModel(application, documentDao) as T
+                return ConverterViewModel(application) as T
             }
             throw IllegalArgumentException("Unable to construct ConverterViewModel")
         }
     }
 
-    // app getter shortcut
-    private val app get() = getApplication<Application>()
+    private val documentDao = app.documentDatabase.documentDao()
     private val workManager get() = WorkManager.getInstance(app)
 
     private val WorkInfo.documentId: Long get() = getDocumentIdFun()
