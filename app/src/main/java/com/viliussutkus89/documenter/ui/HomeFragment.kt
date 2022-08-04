@@ -59,7 +59,8 @@ class HomeFragment: Fragment() {
     } else null
 
     private fun openUri(uri: Uri) {
-        if ("content" == uri.scheme) {
+        when (uri.scheme) {
+            ContentResolver.SCHEME_CONTENT -> {
             (requireActivity() as MainActivity).incrementIdlingResource()
             converterViewModel.convertDocument(uri).observe(viewLifecycleOwner) { document ->
                 findNavController().navigate(
@@ -68,8 +69,8 @@ class HomeFragment: Fragment() {
                     )
                 )
             }
-        } else {
-            binding.root.doOnLayout {
+            }
+            else -> binding.root.doOnLayout {
                 Snackbar.make(it, R.string.error_file_scheme, Snackbar.LENGTH_LONG).show()
             }
         }
