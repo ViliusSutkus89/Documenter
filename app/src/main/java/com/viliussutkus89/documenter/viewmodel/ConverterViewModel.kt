@@ -30,15 +30,6 @@ import com.viliussutkus89.documenter.utils.getMimeType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-private val WorkInfo.documentId: Long get() = getDocumentIdFun()
-private fun WorkInfo.getDocumentIdFun(): Long {
-    tags.forEach {
-        if (it.startsWith("DocumentWork-")) {
-            return it.removePrefix("DocumentWork-").toLong()
-        }
-    }
-    return -1L
-}
 
 class ConverterViewModel(application: Application, private val documentDao: DocumentDao) : AndroidViewModel(application) {
     companion object {
@@ -59,6 +50,16 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
     // app getter shortcut
     private val app get() = getApplication<Application>()
     private val workManager get() = WorkManager.getInstance(app)
+
+    private val WorkInfo.documentId: Long get() = getDocumentIdFun()
+    private fun WorkInfo.getDocumentIdFun(): Long {
+        tags.forEach {
+            if (it.startsWith("DocumentWork-")) {
+                return it.removePrefix("DocumentWork-").toLong()
+            }
+        }
+        return -1L
+    }
 
     private val documentWorkInfoList: LiveData<List<WorkInfo>> = workManager.getWorkInfosByTagLiveData("DocumentWork")
     val workWatcher: LiveData<Unit> = Transformations.map(documentWorkInfoList) { workInfoListUnfiltered ->
