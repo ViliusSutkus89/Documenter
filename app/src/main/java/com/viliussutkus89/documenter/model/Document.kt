@@ -40,9 +40,12 @@ data class Document(
     // example: myDocument.pdf
     val filename: String,
 
+    @ColumnInfo(name = "source_uri")
+    val sourceUri: Uri,
+
     // example: myDocument.html
     @ColumnInfo(name = "converted_filename")
-    val convertedFilename: String? = null,
+    val convertedFilename: String,
 
     @ColumnInfo(name = "last_accessed")
     val lastAccessed: Long = Date().time,
@@ -67,7 +70,7 @@ data class DocumentScoped_Filename_ConvertedFilename(
     val filename: String,
 
     @ColumnInfo(name = "converted_filename")
-    val convertedFilename: String? = null
+    val convertedFilename: String
 )
 
 class StateIntConverter {

@@ -93,8 +93,20 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
     fun convertDocument(uri: Uri): LiveData<Document> {
         val result = MutableLiveData<Document>()
         viewModelScope.launch(Dispatchers.IO) {
+            val type = uri.getMimeType(app.contentResolver)
+            val filename = uri.getFilename(app.contentResolver) ?: "Unknown file"
+            val convertedFilename = if (pdf2htmlEXWorker.SUPPORTED_MIME_TYPES.contains(type)) {
+                pdf2htmlEXWorker.generateConvertedFileName(filename)
+            } else if (wvWareWorker.SUPPORTED_MIME_TYPES.contains(type)) {
+                wvWareWorker.generateConvertedFileName(filename)
+            } else {
+                Log.e(TAG, "Failed to get converted filename. MIME Type='%s', Uri='%s'".format(type, uri))
+                filename
+            }
             val documentId = documentDao.insert(Document(
-                filename = uri.getFilename(app.contentResolver) ?: "Unknown file",
+                sourceUri = uri,
+                filename = filename,
+                convertedFilename = convertedFilename
             ))
             var document = documentDao.getDocument(documentId)
             result.postValue(document)
@@ -112,15 +124,10 @@ class ConverterViewModel(application: Application, private val documentDao: Docu
 
             val type = uri.getMimeType(app.contentResolver)
 
+            val convertedFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, convertedFilename)
             val converterWorkRequestBuilder = if (pdf2htmlEXWorker.SUPPORTED_MIME_TYPES.contains(type)) {
-                val convertedFilename = pdf2htmlEXWorker.generateConvertedFileName(document.filename)
-                documentDao.updateConvertedFilename(documentId, convertedFilename)
-                val convertedFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, convertedFilename)
                 pdf2htmlEXWorker.oneTimeWorkRequestBuilder(cachedSourceFile, convertedFile, app)
             } else if (wvWareWorker.SUPPORTED_MIME_TYPES.contains(type)) {
-                val convertedFilename = wvWareWorker.generateConvertedFileName(document.filename)
-                documentDao.updateConvertedFilename(documentId, convertedFilename)
-                val convertedFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, convertedFilename)
                 wvWareWorker.oneTimeWorkRequestBuilder(cachedSourceFile, convertedFile, app)
             } else {
                 Log.e(TAG, "Failed to find appropriate worker. MIME Type='%s', Uri='%s'".format(type, uri))
