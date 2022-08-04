@@ -71,8 +71,8 @@ jobs:
           name: lintResults
           if-no-files-found: error
 
-      - name: verify schema unchanged
-        run: git status app/schemas | grep "nothing to commit, working tree clean"; echo $?
+      - name: verify that database schema is unchanged
+        run: diff <(git status app/schemas --short) <(echo -n "")
 
   debugBuild:
     runs-on: macos-11
