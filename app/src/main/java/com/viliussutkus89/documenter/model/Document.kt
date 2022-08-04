@@ -19,10 +19,7 @@
 package com.viliussutkus89.documenter.model
 
 import android.net.Uri
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
+import androidx.room.*
 import java.io.File
 import java.util.*
 
@@ -35,7 +32,7 @@ enum class State(val value: Int) {
     Converted(300)
 }
 
-@Entity
+@Entity(indices = [Index(value = ["last_accessed"])])
 data class Document(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

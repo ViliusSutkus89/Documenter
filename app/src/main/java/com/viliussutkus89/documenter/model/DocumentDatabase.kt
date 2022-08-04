@@ -23,8 +23,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Document::class], version = 1, exportSchema = true)
+@Database(entities = [Document::class], version = 2, exportSchema = true)
 @TypeConverters(UriStringConverter::class, StateIntConverter::class)
 abstract class DocumentDatabase: RoomDatabase() {
     abstract fun documentDao(): DocumentDao
@@ -33,12 +35,20 @@ abstract class DocumentDatabase: RoomDatabase() {
         private const val DB_NAME = "document_database"
         private lateinit var INSTANCE: DocumentDatabase
 
+        private val migration_1_to_2 = object: Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Add index on last_accessed
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_Document_last_accessed` ON `document` (`last_accessed`)")
+            }
+        }
+
         fun getDatabase(context: Context): DocumentDatabase {
             if (!::INSTANCE.isInitialized) {
                 synchronized(DocumentDatabase::class.java) {
                     if (!::INSTANCE.isInitialized) {
                         INSTANCE = Room
                             .databaseBuilder(context.applicationContext, DocumentDatabase::class.java, DB_NAME)
+                            .addMigrations(migration_1_to_2)
                             .build()
                     }
                 }
