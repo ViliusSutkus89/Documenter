@@ -80,10 +80,10 @@ class StateIntConverter {
 
 class UriStringConverter {
     @TypeConverter
-    fun fromUri(value: String): Uri = value.let { Uri.parse(value) }
+    fun fromUri(value: String): Uri = if (value.isEmpty()) Uri.EMPTY else Uri.parse(value)
 
     @TypeConverter
-    fun toUri(value: Uri): String = value.let { value.toString() }
+    fun toUri(value: Uri): String = value.toString()
 }
 
 const val DOCUMENTS_DIR_IN_CACHE = "documents"
