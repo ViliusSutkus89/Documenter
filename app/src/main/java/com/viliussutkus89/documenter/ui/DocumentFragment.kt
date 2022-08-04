@@ -35,6 +35,7 @@ import androidx.annotation.StringRes
 import androidx.core.content.FileProvider
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
@@ -42,10 +43,12 @@ import com.google.android.material.snackbar.Snackbar
 import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.databinding.FragmentDocumentBinding
-import com.viliussutkus89.documenter.model.getConvertedHtmlFile
+import com.viliussutkus89.documenter.model.State
 import com.viliussutkus89.documenter.utils.observeOnce
+import com.viliussutkus89.documenter.viewmodel.ConverterViewModel
 import com.viliussutkus89.documenter.viewmodel.DocumentViewModel
 import java.io.File
+
 
 class DocumentFragment: Fragment() {
     companion object {
@@ -57,10 +60,15 @@ class DocumentFragment: Fragment() {
 
     private val args: DocumentFragmentArgs by navArgs()
 
-    private val viewModel: DocumentViewModel by viewModels {
-        val app = requireActivity().application as DocumenterApplication
+    private val app get() = requireActivity().application as DocumenterApplication
+    private val documentViewModel: DocumentViewModel by viewModels {
         DocumentViewModel.Factory(app, args.documentId)
     }
+    private val converterViewModel: ConverterViewModel by activityViewModels {
+        ConverterViewModel.Factory(app)
+    }
+
+    private var savedWebViewBundle: Bundle? = null
 
     private fun getFileUri(file: File): Uri {
         val ctx = requireContext()
@@ -86,27 +94,35 @@ class DocumentFragment: Fragment() {
             allowFileAccess = true
         }
 
-        viewModel.document.observeOnce(viewLifecycleOwner) { document ->
-            savedInstanceState?.getBundle(BUNDLE_KEY_DOCUMENT_VIEW)?.let {
-                binding.documentView.restoreState(it)
-            } ?: run {
-                document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
-                    val convertedUri = FileProvider.getUriForFile(requireContext(), requireContext().packageName + ".provider", htmlFile)
-                    binding.documentView.loadUrl(convertedUri.toString())
+        savedWebViewBundle = savedInstanceState?.getBundle(BUNDLE_KEY_DOCUMENT_VIEW)
+        documentViewModel.stateAndHtmlFile.observe(viewLifecycleOwner) { doc ->
+            if (State.Converted == doc.state) {
+                binding.loading.visibility = View.GONE
+                binding.documentWrapper.visibility = View.VISIBLE
+                savedWebViewBundle?.let {
+                    binding.documentView.restoreState(it)
+                } ?: let {
+                    binding.documentView.loadUrl(getFileUri(doc.htmlFile).toString())
                 }
-            }
 
-            if ((requireActivity() as MainActivity).isIdlingResourceInitialized()) {
-                binding.documentView.webViewClient = object : WebViewClient() {
-                    override fun onPageFinished(view: WebView?, url: String?) {
-                        (requireActivity() as MainActivity).decrementIdlingResource()
+                if ((requireActivity() as MainActivity).isIdlingResourceInitialized()) {
+                    binding.documentView.webViewClient = object : WebViewClient() {
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            (requireActivity() as MainActivity).decrementIdlingResource()
+                        }
                     }
                 }
+            } else {
+                binding.documentWrapper.visibility = View.GONE
+                binding.loading.visibility = View.VISIBLE
+                binding.loadingMessage.text = resources.getString(when (doc.state) {
+                    State.Init -> R.string.state_init
+                    State.Caching -> R.string.state_caching
+                    State.Cached -> R.string.state_cached
+                    State.Converting -> R.string.state_converting
+                    else -> R.string.state_error
+                })
             }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            requireActivity().addMenuProvider(saveMenu, viewLifecycleOwner, Lifecycle.State.RESUMED)
         }
         requireActivity().addMenuProvider(documentMenu, viewLifecycleOwner, Lifecycle.State.RESUMED)
         return binding.root
@@ -114,11 +130,12 @@ class DocumentFragment: Fragment() {
 
     override fun onPause() {
         super.onPause()
-
-        val view = binding.documentWrapper
-        val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-        view.draw(Canvas(bitmap))
-        viewModel.saveThumbnail(bitmap, requireContext().cacheDir)
+        if (View.VISIBLE == binding.documentWrapper.visibility) {
+            val view = binding.documentWrapper
+            val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+            view.draw(Canvas(bitmap))
+            documentViewModel.saveThumbnail(bitmap)
+        }
     }
 
     override fun onDestroyView() {
@@ -145,6 +162,11 @@ class DocumentFragment: Fragment() {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
                 menu.findItem(R.id.open_with).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
                 menu.findItem(R.id.share).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+                menu.findItem(R.id.reload).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+            }
+
+            documentViewModel.canReload.observeOnce(viewLifecycleOwner) {
+                menu.findItem(R.id.reload).isVisible = it
             }
         }
 
@@ -164,15 +186,13 @@ class DocumentFragment: Fragment() {
         }
 
         private fun openWith() {
-            viewModel.document.observeOnce(viewLifecycleOwner) { document ->
-                document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
-                    try {
-                        startActivity(Intent(Intent.ACTION_VIEW, getFileUri(htmlFile))
-                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
-                    } catch (e: ActivityNotFoundException) {
-                        e.printStackTrace()
-                        showSnackBar(R.string.error_open_with_failed)
-                    }
+            documentViewModel.htmlFile.observeOnce(viewLifecycleOwner) { htmlFile ->
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, getFileUri(htmlFile))
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
+                } catch (e: ActivityNotFoundException) {
+                    e.printStackTrace()
+                    showSnackBar(R.string.error_open_with_failed)
                 }
             }
         }
@@ -190,20 +210,16 @@ class DocumentFragment: Fragment() {
                     showSnackBar(R.string.error_share_failed)
                 }
             }
+        }
 
-
-            viewModel.document.observeOnce(viewLifecycleOwner) { document ->
-                document.getConvertedHtmlFile(requireContext().filesDir)?.let { htmlFile ->
-                    try {
-                        startActivity(Intent(Intent.ACTION_SEND).apply {
-                            type = "text/html"
-                            putExtra(Intent.EXTRA_STREAM, getFileUri(htmlFile))
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        })
-                    } catch (e: ActivityNotFoundException) {
-                        e.printStackTrace()
-                        showSnackBar(R.string.error_share_failed)
-                    }
+        private fun reload() {
+            savedWebViewBundle = null
+            documentViewModel.canReload.observeOnce(viewLifecycleOwner) {
+                if (it) {
+                    (requireActivity() as MainActivity).incrementIdlingResource()
+                    converterViewModel.reload(args.documentId)
+                } else {
+                    showSnackBar(R.string.error_cannot_reload_because_old_version)
                 }
             }
         }
@@ -224,6 +240,10 @@ class DocumentFragment: Fragment() {
                 }
                 R.id.share -> {
                     share()
+                    true
+                }
+                R.id.reload -> {
+                    reload()
                     true
                 }
                 else -> false

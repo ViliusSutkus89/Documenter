@@ -24,12 +24,15 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
 import com.viliussutkus89.documenter.model.Document
 import com.viliussutkus89.documenter.model.DocumentDao
-import com.viliussutkus89.documenter.model.getCachedDir
-import com.viliussutkus89.documenter.model.getFilesDir
+import com.viliussutkus89.documenter.model.getDocumentCacheDir
+import com.viliussutkus89.documenter.model.getDocumentFilesDir
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -40,11 +43,11 @@ class HomeViewModel(private val documentDao: DocumentDao) : ViewModel() {
                 @Suppress("UNCHECKED_CAST")
                 return HomeViewModel(documentDao) as T
             }
-            throw IllegalArgumentException("Unable to construct ViewModel")
+            throw IllegalArgumentException("Unable to construct HomeViewModel")
         }
     }
 
-    val documents: LiveData<List<Document>> = documentDao.getDocuments().asLiveData()
+    val documents = documentDao.getDocuments().asLiveData()
 
     // handle uri incoming through Intent only once
     private var intentUriHandled = false
@@ -62,8 +65,8 @@ class HomeViewModel(private val documentDao: DocumentDao) : ViewModel() {
     fun removeDocument(document: Document, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             WorkManager.getInstance(context).cancelUniqueWork("document-${document.id}")
-            document.getCachedDir(appCacheDir = context.cacheDir).deleteRecursively()
-            document.getFilesDir(appFilesDir = context.filesDir).deleteRecursively()
+            getDocumentCacheDir(appCacheDir = context.cacheDir, document.id).deleteRecursively()
+            getDocumentFilesDir(appFilesDir = context.filesDir, document.id).deleteRecursively()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 if (document.sourceUri.toString().isNotEmpty() && documentDao.isUriUnique(document.sourceUri)) {

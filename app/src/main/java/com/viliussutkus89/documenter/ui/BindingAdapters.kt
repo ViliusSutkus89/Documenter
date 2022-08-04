@@ -25,14 +25,14 @@ import androidx.databinding.BindingAdapter
 import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.model.Document
 import com.viliussutkus89.documenter.model.State
-import com.viliussutkus89.documenter.model.getThumbnailFile
+import com.viliussutkus89.documenter.model.getThumbnail
 import java.io.File
 
 @BindingAdapter("documentThumbnail", "cacheDir")
 fun setDocumentThumbnail(imageView: ImageView, document: Document, appCacheDir: File) {
-    document.getThumbnailFile(appCacheDir)?.let {
-        imageView.setImageURI(it.toUri())
-    } ?: run {
+    if (document.thumbnailAvailable) {
+        imageView.setImageURI(getThumbnail(appCacheDir = appCacheDir, document.id).toUri())
+    } else {
         imageView.setImageResource(
             when (document.state) {
                 State.Converted -> R.drawable.ic_folder_open

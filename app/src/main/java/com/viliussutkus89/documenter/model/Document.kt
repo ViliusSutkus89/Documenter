@@ -64,13 +64,18 @@ data class DocumentScoped_Filename_State(
     val state: State
 )
 
-data class DocumentScoped_Filename_ConvertedFilename(
+data class DocumentScoped_Filename_SourceUri_ConvertedFilename_State(
     val id: Long,
 
     val filename: String,
 
+    @ColumnInfo(name = "source_uri")
+    val sourceUri: Uri,
+
     @ColumnInfo(name = "converted_filename")
-    val convertedFilename: String
+    val convertedFilename: String,
+
+    val state: State
 )
 
 class StateIntConverter {
@@ -92,50 +97,30 @@ class UriStringConverter {
 const val DOCUMENTS_DIR_IN_CACHE = "documents"
 const val DOCUMENTS_DIR_IN_FILES = "documents"
 
-fun Document.getCachedDir(appCacheDir: File): File {
+fun getDocumentCacheDir(appCacheDir: File, documentId: Long): File {
     val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
-    return File(cacheDir, id.toString())
+    return File(cacheDir, documentId.toString())
 }
 
-fun Document.getFilesDir(appFilesDir: File): File {
+fun getDocumentFilesDir(appFilesDir: File, documentId: Long): File {
     val filesDir = File(appFilesDir, DOCUMENTS_DIR_IN_FILES)
-    return File(filesDir, id.toString())
-}
-
-fun Document.getCachedSourceFile(appCacheDir: File): File {
-    val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
-    val documentDir = File(cacheDir, id.toString())
-    return File(documentDir, filename)
-}
-
-fun Document.getConvertedHtmlFile(appFilesDir: File): File? {
-    val filesDir = File(appFilesDir, DOCUMENTS_DIR_IN_FILES)
-    val documentDir = File(filesDir, id.toString())
-    return convertedFilename?.let { File(documentDir, convertedFilename) }
-}
-
-fun DocumentScoped_Filename_ConvertedFilename.getConvertedHtmlFile(appFilesDir: File): File? {
-    val filesDir = File(appFilesDir, DOCUMENTS_DIR_IN_FILES)
-    val documentDir = File(filesDir, id.toString())
-    return convertedFilename?.let { File(documentDir, convertedFilename) }
-}
-
-fun DocumentScoped_Filename_ConvertedFilename.getScreenshotFile(appCacheDir: File): File {
-    val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
-    val documentDir = File(cacheDir, id.toString())
-    return File(documentDir, "screenshot.png")
-}
-
-fun Document.getThumbnailFile(appCacheDir: File): File? {
-    return if (thumbnailAvailable) {
-        val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
-        val documentDir = File(cacheDir, id.toString())
-        File(documentDir, "screenshot.png")
-    } else null
+    return File(filesDir, documentId.toString())
 }
 
 fun getCachedSourceFile(appCacheDir: File, documentId: Long, filename: String): File {
     val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
     val documentDir = File(cacheDir, documentId.toString())
     return File(documentDir, filename)
+}
+
+fun getConvertedHtmlFile(appFilesDir: File, documentId: Long, convertedFilename: String): File {
+    val filesDir = File(appFilesDir, DOCUMENTS_DIR_IN_FILES)
+    val documentDir = File(filesDir, documentId.toString())
+    return File(documentDir, convertedFilename)
+}
+
+fun getThumbnail(appCacheDir: File, documentId: Long): File {
+    val cacheDir = File(appCacheDir, DOCUMENTS_DIR_IN_CACHE)
+    val documentDir = File(cacheDir, documentId.toString())
+    return File(documentDir, "screenshot.png")
 }

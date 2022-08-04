@@ -18,6 +18,7 @@
 
 package com.viliussutkus89.documenter.ui
 
+import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -25,7 +26,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
@@ -62,9 +62,9 @@ class HomeFragment: Fragment() {
         when (uri.scheme) {
             ContentResolver.SCHEME_CONTENT -> {
             (requireActivity() as MainActivity).incrementIdlingResource()
-            converterViewModel.convertDocument(uri).observe(viewLifecycleOwner) { document ->
+            converterViewModel.convert(uri).observe(viewLifecycleOwner) { document ->
                 findNavController().navigate(
-                    HomeFragmentDirections.actionHomeFragmentToLoadingFragment(
+                    HomeFragmentDirections.actionHomeFragmentToDocumentFragment(
                         document.id, document.filename
                     )
                 )
@@ -113,7 +113,7 @@ class HomeFragment: Fragment() {
             appCacheDir = requireContext().cacheDir,
             openListener = {
                 (requireActivity() as MainActivity).incrementIdlingResource()
-                findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoadingFragment(it.id, it.filename))
+                findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToDocumentFragment(it.id, it.filename))
             },
             removeListener = { homeViewModel.removeDocument(it, requireContext()) }
         )

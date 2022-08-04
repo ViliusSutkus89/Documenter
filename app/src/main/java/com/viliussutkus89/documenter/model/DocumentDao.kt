@@ -18,6 +18,7 @@
 
 package com.viliussutkus89.documenter.model
 
+import android.net.Uri
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
@@ -31,7 +32,7 @@ interface DocumentDao {
     @Query("SELECT * FROM `document` ORDER BY `last_accessed` DESC")
     fun getDocuments(): Flow<List<Document>>
 
-    @Query("SELECT * FROM `document` WHERE id = :id")
+    @Query("SELECT * FROM `document` WHERE `id` = :id")
     fun getDocument(id: Long): Document
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
@@ -40,11 +41,8 @@ interface DocumentDao {
     @Delete
     fun delete(document: Document)
 
-    @Query("SELECT `id`, `filename`, `state` FROM `document` WHERE `id` = :id")
-    fun getFilenameAndState(id: Long): Flow<DocumentScoped_Filename_State>
-
-    @Query("SELECT `id`, `filename`, `converted_filename` FROM `document` WHERE `id` = :id")
-    fun getFilenameConvertedFilename(id: Long): Flow<DocumentScoped_Filename_ConvertedFilename>
+    @Query("SELECT `id`, `filename`, `converted_filename`, `source_uri`, `state` FROM `document` WHERE `id` = :id")
+    fun getFilenameSourceUriConvertedFilenameState(id: Long): Flow<DocumentScoped_Filename_SourceUri_ConvertedFilename_State>
 
     @Query("UPDATE `document` SET `last_accessed` = $CURRENT_TIMESTAMP WHERE `id` = :id")
     fun updateLastAccessed(id: Long)
@@ -57,6 +55,9 @@ interface DocumentDao {
 
     @Query("UPDATE `document` SET `state` = :internal_errorState WHERE `id` = :id")
     fun errorState(id: Long, internal_errorState: State = State.Error)
+
+    @Query("Update `document` SET `state` = :internal_initState, `thumbnail_available` = 0 WHERE `id` = :id")
+    fun reloadDocument(id: Long, internal_initState: State = State.Init)
 
     @Query("UPDATE `document` SET `converted_filename` = :convertedFilename WHERE `id` = :id")
     fun updateConvertedFilename(id: Long, convertedFilename: String)

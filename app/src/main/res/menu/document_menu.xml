@@ -16,4 +16,9 @@
         android:icon="@drawable/ic_baseline_share_24"
         android:title="@string/menu_share"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/reload"
+        android:icon="@drawable/ic_baseline_sync_24"
+        android:title="@string/menu_reload"
+        app:showAsAction="ifRoom" />
 </menu>

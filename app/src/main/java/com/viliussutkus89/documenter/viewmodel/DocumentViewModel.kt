@@ -18,29 +18,22 @@
 
 package com.viliussutkus89.documenter.viewmodel
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.core.net.toUri
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.viliussutkus89.documenter.DocumenterApplication
-import androidx.work.workDataOf
 import com.viliussutkus89.documenter.background.SaveWorker
-import com.viliussutkus89.documenter.model.DocumentDao
-import com.viliussutkus89.documenter.model.DocumentScoped_Filename_ConvertedFilename
+import com.viliussutkus89.documenter.model.State
 import com.viliussutkus89.documenter.model.getConvertedHtmlFile
-import com.viliussutkus89.documenter.model.getScreenshotFile
+import com.viliussutkus89.documenter.model.getThumbnail
+import com.viliussutkus89.documenter.utils.observeOnce
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
-import java.util.*
 
 
 class DocumentViewModel(private val app: DocumenterApplication, private val documentId: Long) : AndroidViewModel(app) {
@@ -58,11 +51,6 @@ class DocumentViewModel(private val app: DocumenterApplication, private val docu
     }
 
     private val documentDao = app.documentDatabase.documentDao()
-    val document = documentDao.getFilenameConvertedFilename(documentId).asLiveData()
-
-    val htmlFile: LiveData<File> = Transformations.map(document) {
-        getConvertedHtmlFile(appFilesDir = context.filesDir, it.id, it.convertedFilename!!)
-    }
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -70,10 +58,39 @@ class DocumentViewModel(private val app: DocumenterApplication, private val docu
         }
     }
 
-    fun saveThumbnail(bitmap: Bitmap, appCacheDir: File) {
+    var document = documentDao.getFilenameSourceUriConvertedFilenameState(documentId).asLiveData()
+
+    data class StateAndHtmlFile(
+        val state: State,
+        val htmlFile: File
+    )
+    val stateAndHtmlFile: LiveData<StateAndHtmlFile> = Transformations.map(document) {
+        StateAndHtmlFile(
+            state = it.state,
+            htmlFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, it.convertedFilename)
+        )
+    }
+
+    val canReload: LiveData<Boolean> = Transformations.map(document) {
+        if (!Uri.EMPTY.equals(it.sourceUri)) {
+            try {
+                app.contentResolver.openInputStream(it.sourceUri)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        } else {
+            false
+        }
+    }
+
+    val htmlFile: LiveData<File> = Transformations.map(document) {
+        getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, it.convertedFilename)
+    }
+
+    fun saveThumbnail(bitmap: Bitmap) {
         viewModelScope.launch(Dispatchers.IO) {
-            val screenshot = document.value?.getScreenshotFile(appCacheDir)
-            FileOutputStream(screenshot).use { out ->
+            FileOutputStream(getThumbnail(appCacheDir = app.cacheDir, documentId)).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 50, out)
             }
             documentDao.updateLastAccessedAndSetThumbnailAvailable(documentId)
@@ -81,10 +98,13 @@ class DocumentViewModel(private val app: DocumenterApplication, private val docu
     }
 
     fun saveDocument(destinationUri: Uri) {
-        WorkManager.getInstance(app).beginUniqueWork(
-            "saveDocument-${documentId}",
-            ExistingWorkPolicy.REPLACE,
-            SaveWorker.oneTimeWorkRequestBuilder(htmlFile.value!!.toUri(), destinationUri).build()
-        ).enqueue()
+        document.observeOnce {
+            val html = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, it.convertedFilename)
+            WorkManager.getInstance(app).beginUniqueWork(
+                "saveDocument-${documentId}",
+                ExistingWorkPolicy.REPLACE,
+                SaveWorker.oneTimeWorkRequestBuilder(html.toUri(), destinationUri).build()
+            ).enqueue()
+        }
     }
 }

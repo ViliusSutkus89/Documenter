@@ -25,9 +25,15 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
-import androidx.work.*
-import com.viliussutkus89.documenter.background.*
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.viliussutkus89.documenter.DocumenterApplication
+import com.viliussutkus89.documenter.background.CleanupCachedDocumentWorker
+import com.viliussutkus89.documenter.background.SaveToCacheWorker
+import com.viliussutkus89.documenter.background.pdf2htmlEXWorker
+import com.viliussutkus89.documenter.background.wvWareWorker
 import com.viliussutkus89.documenter.model.*
 import com.viliussutkus89.documenter.utils.getFilename
 import com.viliussutkus89.documenter.utils.getMimeType
@@ -103,7 +109,7 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
         }
     }
 
-    fun convertDocument(uri: Uri): LiveData<Document> {
+    fun convert(uri: Uri): LiveData<Document> {
         val result = MutableLiveData<Document>()
         viewModelScope.launch(Dispatchers.IO) {
             val type = uri.getMimeType(app.contentResolver)
@@ -124,48 +130,61 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
                 filename = filename,
                 convertedFilename = convertedFilename
             ))
-            var document = documentDao.getDocument(documentId)
-            result.postValue(document)
-
-            document.getCachedDir(appCacheDir = app.cacheDir).mkdirs()
-            document.getFilesDir(appFilesDir = app.filesDir).mkdirs()
-
-            val cachedSourceFile = getCachedSourceFile(appCacheDir = app.cacheDir, document.id, document.filename)
-            val saveToCacheWorkRequest = SaveToCacheWorker.oneTimeWorkRequestBuilder(document.sourceUri, cachedSourceFile)
-                .addTag("DocumentWork-${document.id}")
-                .addTag("SaveToCacheWork")
-                .build()
-
-            var continuation = workManager.beginUniqueWork("document-${documentId}", ExistingWorkPolicy.REPLACE, saveToCacheWorkRequest)
-
-            val type = uri.getMimeType(app.contentResolver)
-
-            val convertedFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, convertedFilename)
-            val converterWorkRequestBuilder = if (pdf2htmlEXWorker.SUPPORTED_MIME_TYPES.contains(type)) {
-                pdf2htmlEXWorker.oneTimeWorkRequestBuilder(cachedSourceFile, convertedFile, app)
-            } else if (wvWareWorker.SUPPORTED_MIME_TYPES.contains(type)) {
-                wvWareWorker.oneTimeWorkRequestBuilder(cachedSourceFile, convertedFile, app)
-            } else {
-                Log.e(TAG, "Failed to find appropriate worker. MIME Type='%s', Uri='%s'".format(type, uri))
-                documentDao.errorState(id = documentId)
-                return@launch
+            documentDao.getDocument(documentId).let {
+                result.postValue(it)
+                convert(it)
             }
-
-            val converterWorkRequest = converterWorkRequestBuilder
-                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                .addTag("DocumentWork")
-                .addTag("DocumentWork-${document.id}")
-                .addTag("ConvertWork")
-                .build()
-
-            continuation = continuation.then(converterWorkRequest)
-
-            continuation = continuation.then(
-                CleanupCachedDocumentWorker.oneTimeWorkRequestBuilder(cachedSourceFile).build()
-            )
-
-            continuation.enqueue()
         }
         return result
+    }
+
+    fun reload(documentId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            getDocumentCacheDir(appCacheDir = app.cacheDir, documentId).deleteRecursively()
+            getDocumentFilesDir(appFilesDir = app.filesDir, documentId).deleteRecursively()
+            documentDao.reloadDocument(documentId)
+            documentDao.getDocument(documentId).let {
+                convert(it)
+            }
+        }
+    }
+
+    private fun convert(document: Document) {
+        getDocumentCacheDir(appCacheDir = app.cacheDir, document.id).mkdirs()
+        getDocumentFilesDir(appFilesDir = app.filesDir, document.id).mkdirs()
+
+        val cachedSourceFile = getCachedSourceFile(appCacheDir = app.cacheDir, document.id, document.filename)
+        val saveToCacheWorkRequest = SaveToCacheWorker.oneTimeWorkRequestBuilder(document.sourceUri, cachedSourceFile)
+            .addTag("DocumentWork-${document.id}")
+            .addTag("SaveToCacheWork")
+            .build()
+
+        var continuation = workManager.beginUniqueWork("document-${document.id}", ExistingWorkPolicy.REPLACE, saveToCacheWorkRequest)
+
+        val type = document.sourceUri.getMimeType(app.contentResolver)
+
+        val convertedFile = getConvertedHtmlFile(appFilesDir = app.filesDir, document.id, document.convertedFilename)
+        val converterWorkRequestBuilder = if (pdf2htmlEXWorker.SUPPORTED_MIME_TYPES.contains(type)) {
+            pdf2htmlEXWorker.oneTimeWorkRequestBuilder(cachedSourceFile, convertedFile, app)
+        } else if (wvWareWorker.SUPPORTED_MIME_TYPES.contains(type)) {
+            wvWareWorker.oneTimeWorkRequestBuilder(cachedSourceFile, convertedFile, app)
+        } else {
+            Log.e(TAG, "Failed to find appropriate worker. MIME Type='%s', Uri='%s'".format(type, document.sourceUri))
+            documentDao.errorState(id = document.id)
+            return
+        }
+        val converterWorkRequest = converterWorkRequestBuilder
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .addTag("DocumentWork")
+            .addTag("DocumentWork-${document.id}")
+            .build()
+
+        continuation = continuation.then(converterWorkRequest)
+
+        continuation = continuation.then(
+            CleanupCachedDocumentWorker.oneTimeWorkRequestBuilder(cachedSourceFile).build()
+        )
+
+        continuation.enqueue()
     }
 }
