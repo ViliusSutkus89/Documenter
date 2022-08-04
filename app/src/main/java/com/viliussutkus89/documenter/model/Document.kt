@@ -58,11 +58,11 @@ data class DocumentScoped_Filename_State(
 
     val filename: String,
 
-    val state: State = State.Init
+    val state: State
 )
 
 data class DocumentScoped_Filename_ConvertedFilename(
-    val id: Long = 0,
+    val id: Long,
 
     val filename: String,
 
