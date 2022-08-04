@@ -18,12 +18,16 @@
 
 package com.viliussutkus89.documenter.viewmodel
 
-import android.app.Application
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import androidx.work.*
 import com.viliussutkus89.documenter.background.*
+import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.model.*
 import com.viliussutkus89.documenter.utils.getFilename
 import com.viliussutkus89.documenter.utils.getMimeType
@@ -89,6 +93,16 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    private fun takePermission(uri: Uri) {
+        if (app.checkUriPermission(uri, android.os.Process.myPid(), android.os.Process.myUid(), Intent.FLAG_GRANT_READ_URI_PERMISSION) == PackageManager.PERMISSION_GRANTED) {
+            try {
+                app.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            } catch (se: SecurityException) {
+            }
+        }
+    }
+
     fun convertDocument(uri: Uri): LiveData<Document> {
         val result = MutableLiveData<Document>()
         viewModelScope.launch(Dispatchers.IO) {
@@ -101,6 +115,9 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
             } else {
                 Log.e(TAG, "Failed to get converted filename. MIME Type='%s', Uri='%s'".format(type, uri))
                 filename
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                takePermission(uri)
             }
             val documentId = documentDao.insert(Document(
                 sourceUri = uri,

@@ -60,4 +60,7 @@ interface DocumentDao {
 
     @Query("UPDATE `document` SET `converted_filename` = :convertedFilename WHERE `id` = :id")
     fun updateConvertedFilename(id: Long, convertedFilename: String)
+
+    @Query("SELECT CASE WHEN COUNT(`source_uri`) = 1 THEN 1 ELSE 0 END FROM `document` WHERE `source_uri` = :uri")
+    fun isUriUnique(uri: Uri): Boolean
 }

@@ -18,7 +18,12 @@
 
 package com.viliussutkus89.documenter.viewmodel
 
+import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import androidx.work.WorkManager
 import com.viliussutkus89.documenter.model.Document
@@ -49,11 +54,22 @@ class HomeViewModel(private val documentDao: DocumentDao) : ViewModel() {
         return prev
     }
 
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    private fun releasePermission(uri: Uri, contentResolver: ContentResolver) {
+        contentResolver.releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
     fun removeDocument(document: Document, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             WorkManager.getInstance(context).cancelUniqueWork("document-${document.id}")
             document.getCachedDir(appCacheDir = context.cacheDir).deleteRecursively()
             document.getFilesDir(appFilesDir = context.filesDir).deleteRecursively()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (document.sourceUri.toString().isNotEmpty() && documentDao.isUriUnique(document.sourceUri)) {
+                    releasePermission(document.sourceUri, context.contentResolver)
+                }
+            }
             documentDao.delete(document)
         }
     }
