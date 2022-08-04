@@ -59,7 +59,7 @@
 
         Open files through a proper file manager and share to this application.
     </string>
-    <string name="error_file_scheme">Unsupported file scheme! Please use a better file manager.</string>
+    <string name="error_file_scheme">Unsupported file provider! Please use a different file manager.</string>
     <string name="fragment_pre_kit_kat_label">pre KitKat support</string>
 
     <string name="menu_settings">Settings</string>
