@@ -35,6 +35,7 @@ import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.viewmodel.ConverterViewModel
 
+
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private val navController: NavController by lazy {
         (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
@@ -42,8 +43,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private val converterViewModel: ConverterViewModel by viewModels {
-        val app = application as DocumenterApplication
-        ConverterViewModel.Factory(app)
+        ConverterViewModel.Factory(application as DocumenterApplication)
     }
 
     private val mainMenuProvider = object: MenuProvider {
