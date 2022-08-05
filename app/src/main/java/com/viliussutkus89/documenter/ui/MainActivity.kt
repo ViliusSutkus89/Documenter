@@ -87,39 +87,34 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         addMenuProvider(mainMenuProvider)
 
         converterViewModel.workWatcher.observe(this) {}
-
-        if (intent.getBooleanExtra(FORCE_INIT_IDLING_RESOURCE, false)) {
-            idlingResource.increment()
-            idlingResource.decrement()
-        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
-    private val idlingResourceDelegate = lazy {
-        CountingIdlingResource("${javaClass.name}.idlingResource")
-    }
-
     companion object {
-        @VisibleForTesting
-        internal const val FORCE_INIT_IDLING_RESOURCE = "force_init_idling_resource"
+        val isRunningTest: Boolean get() = try {
+            Class.forName("androidx.test.espresso.Espresso")
+            true
+        } catch (e: ClassNotFoundException) {
+            false
+        }
     }
 
     @VisibleForTesting
-    internal val idlingResource by idlingResourceDelegate
-
-    internal fun isIdlingResourceInitialized() = idlingResourceDelegate.isInitialized()
+    internal val idlingResource by lazy {
+        CountingIdlingResource("${javaClass.name}.idlingResource")
+    }
 
     internal fun incrementIdlingResource() {
-        if (idlingResourceDelegate.isInitialized()) {
+        if (isRunningTest) {
             idlingResource.increment()
         }
     }
 
     internal fun decrementIdlingResource() {
-        if (idlingResourceDelegate.isInitialized()) {
+        if (isRunningTest) {
             idlingResource.decrement()
         }
     }

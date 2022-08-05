@@ -31,7 +31,6 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.pressBack
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.viliussutkus89.android.assetextractor.AssetExtractor
@@ -39,7 +38,6 @@ import com.viliussutkus89.documenter.rule.CloseSystemDialogsTestRule
 import com.viliussutkus89.documenter.rule.ScreenshotFailedTestRule
 import com.viliussutkus89.documenter.ui.MainActivity
 import org.junit.*
-import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.File
@@ -88,7 +86,6 @@ class OpeningFromOtherAppTest {
         val authority = appContext.packageName + ".instrumentedTestsProvider"
         val uri = FileProvider.getUriForFile(appContext, authority, testFile)
         return Intent(Intent.ACTION_VIEW, uri, appContext, MainActivity::class.java)
-            .putExtra(MainActivity.FORCE_INIT_IDLING_RESOURCE, true)
     }
 
     private lateinit var idlingResource: IdlingResource

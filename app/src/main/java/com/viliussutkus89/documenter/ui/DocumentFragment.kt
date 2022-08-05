@@ -130,11 +130,9 @@ class DocumentFragment: Fragment() {
                 }
             }
         }
-        if ((requireActivity() as MainActivity).isIdlingResourceInitialized()) {
-            binding.documentView.webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    (requireActivity() as MainActivity).decrementIdlingResource()
-                }
+        binding.documentView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                (requireActivity() as MainActivity).decrementIdlingResource()
             }
         }
     }
