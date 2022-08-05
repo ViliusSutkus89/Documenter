@@ -71,4 +71,5 @@
     <string name="fragment_settings_label">Settings</string>
     <string name="menu_reload">Reload document</string>
     <string name="error_cannot_reload_because_old_version">Cannot reload this document. Please re-open it instead.</string>
+    <string name="error_cannot_save_copy_protected_document">Refusing to save copy protected document!</string>
 </resources>

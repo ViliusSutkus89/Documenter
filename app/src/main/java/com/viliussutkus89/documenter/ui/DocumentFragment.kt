@@ -170,10 +170,6 @@ class DocumentFragment: Fragment() {
                 menu.findItem(R.id.save).isVisible = false
             }
 
-            documentViewModel.isCopyProtected.observeOnce(viewLifecycleOwner) {
-                menu.findItem(R.id.save).isVisible = !it
-            }
-
             // Workaround for Issue #7
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
                 menu.findItem(R.id.open_with).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
@@ -193,11 +189,15 @@ class DocumentFragment: Fragment() {
         @RequiresApi(Build.VERSION_CODES.KITKAT)
         private fun save() {
             documentViewModel.document.observeOnce(viewLifecycleOwner) { document ->
-                registerForActivityResult<String, Uri>(ActivityResultContracts.CreateDocument("text/html")) {
-                    it?.let {
-                        documentViewModel.saveDocument(it)
-                    }
-                }.launch(document.convertedFilename)
+                if (document.copyProtected) {
+                    showSnackBar(R.string.error_cannot_save_copy_protected_document)
+                } else {
+                    registerForActivityResult<String, Uri>(ActivityResultContracts.CreateDocument("text/html")) {
+                        it?.let {
+                            documentViewModel.saveDocument(it)
+                        }
+                    }.launch(document.convertedFilename)
+                }
             }
         }
 
