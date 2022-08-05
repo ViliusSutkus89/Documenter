@@ -53,7 +53,10 @@ data class Document(
     val state: State = State.Init,
 
     @ColumnInfo(name = "thumbnail_available")
-    val thumbnailAvailable: Boolean = false
+    val thumbnailAvailable: Boolean = false,
+
+    @ColumnInfo(name = "copy_protected")
+    val copyProtected: Boolean = false
 )
 
 data class DocumentScoped_Filename_State(
@@ -64,7 +67,7 @@ data class DocumentScoped_Filename_State(
     val state: State
 )
 
-data class DocumentScoped_Filename_SourceUri_ConvertedFilename_State(
+data class DocumentScoped_Filename_SourceUri_ConvertedFilename_State_CopyProtected(
     val id: Long,
 
     val filename: String,
@@ -75,7 +78,10 @@ data class DocumentScoped_Filename_SourceUri_ConvertedFilename_State(
     @ColumnInfo(name = "converted_filename")
     val convertedFilename: String,
 
-    val state: State
+    val state: State,
+
+    @ColumnInfo(name = "copy_protected")
+    val copyProtected: Boolean = false
 )
 
 class StateIntConverter {

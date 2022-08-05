@@ -28,13 +28,13 @@ import com.viliussutkus89.android.pdf2htmlex.pdf2htmlEX
 import java.io.File
 import java.io.IOException
 
+
 class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): ConverterWorkerCommon(ctx, params) {
     class RemoteWorkerService : androidx.work.multiprocess.RemoteWorkerService()
 
     companion object {
         private const val TAG = "Workerpdf2htmlEX"
         private const val SETTING_KEY_OUTLINE = "setting_outline"
-        private const val SETTING_KEY_DRM = "setting_drm"
         private const val SETTING_KEY_ANNOTATIONS = "setting_annotation"
 
         // https://filext.com/file-extension/PDF
@@ -56,7 +56,6 @@ class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): ConverterWorkerC
                     commonDataBuilder(cachedSourceFile, convertedHtmlFile, context.packageName)
                         .putString(ARGUMENT_CLASS_NAME, RemoteWorkerService::class.java.name)
                         .putBoolean(SETTING_KEY_OUTLINE, preferences.getBoolean("pdf2htmlex_outline", true))
-                        .putBoolean(SETTING_KEY_DRM, preferences.getBoolean("pdf2htmlex_drm", true))
                         .putBoolean(SETTING_KEY_ANNOTATIONS, preferences.getBoolean("pdf2htmlex_annotations", true))
                         .build()
                 )
@@ -65,12 +64,20 @@ class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): ConverterWorkerC
     }
 
     override fun doWorkSync(inputFile: File): File? {
+        val converter: pdf2htmlEX
         return try {
-            val converter = pdf2htmlEX(applicationContext).setInputPDF(inputFile)
+            converter = pdf2htmlEX(applicationContext)
+            converter.setInputPDF(inputFile)
             converter.setOutline(inputData.getBoolean(SETTING_KEY_OUTLINE, false))
-            converter.setDRM(inputData.getBoolean(SETTING_KEY_DRM, false))
             converter.setProcessAnnotation(inputData.getBoolean(SETTING_KEY_ANNOTATIONS, false))
-            converter.convert()
+            try {
+                converter.convert()
+            } catch (e: pdf2htmlEX.CopyProtectionException) {
+                Log.i(TAG, "Attempting to process copy protected document")
+                converter.setDRM(false)
+                copyProtected = true
+                converter.convert()
+            }
         } catch (e: IOException) {
             Log.e(TAG, "Conversion failed")
             e.printStackTrace()

@@ -37,13 +37,14 @@ abstract class DocumentDatabase: RoomDatabase() {
 
         private val migration_1_to_2 = object: Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // add source_uri and add NOT NULL constraint on converted_filename
+                // add NOT NULL constraint on converted_filename
+                // add source_uri
+                // add copy_protected
                 db.execSQL("UPDATE `document` SET `converted_filename` = '' WHERE `converted_filename` IS NULL")
-                db.execSQL("CREATE TABLE `document_2` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `filename` TEXT NOT NULL, `source_uri` TEXT NOT NULL, `converted_filename` TEXT NOT NULL, `last_accessed` INTEGER NOT NULL, `state` INTEGER NOT NULL, `thumbnail_available` INTEGER NOT NULL)")
-                db.execSQL("INSERT INTO `document_2` (`id`, `filename`, `source_uri`, `converted_filename`, `last_accessed`, `state`, `thumbnail_available`) SELECT `id`, `filename`,  '', `converted_filename`, `last_accessed`, `state`, `thumbnail_available` FROM `document`")
+                db.execSQL("CREATE TABLE `document_2` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `filename` TEXT NOT NULL, `source_uri` TEXT NOT NULL, `converted_filename` TEXT NOT NULL, `last_accessed` INTEGER NOT NULL, `state` INTEGER NOT NULL, `thumbnail_available` INTEGER NOT NULL, `copy_protected` INTEGER NOT NULL)")
+                db.execSQL("INSERT INTO `document_2` (`id`, `filename`, `source_uri`, `converted_filename`, `last_accessed`, `state`, `thumbnail_available`, `copy_protected`) SELECT `id`, `filename`,  '', `converted_filename`, `last_accessed`, `state`, `thumbnail_available`, 0 FROM `document`")
                 db.execSQL("DROP TABLE `document`")
                 db.execSQL("ALTER TABLE `document_2` RENAME TO `document`")
-
                 // Add index on last_accessed
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_Document_last_accessed` ON `document` (`last_accessed`)")
             }

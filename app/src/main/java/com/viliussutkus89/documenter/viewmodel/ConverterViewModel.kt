@@ -30,10 +30,7 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.viliussutkus89.documenter.DocumenterApplication
-import com.viliussutkus89.documenter.background.CleanupCachedDocumentWorker
-import com.viliussutkus89.documenter.background.SaveToCacheWorker
-import com.viliussutkus89.documenter.background.pdf2htmlEXWorker
-import com.viliussutkus89.documenter.background.wvWareWorker
+import com.viliussutkus89.documenter.background.*
 import com.viliussutkus89.documenter.model.*
 import com.viliussutkus89.documenter.utils.getFilename
 import com.viliussutkus89.documenter.utils.getMimeType
@@ -86,6 +83,9 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
                         documentDao.progressState(workInfo.documentId, State.Cached)
                     }
                     else if (workInfo.tags.contains("ConvertWork")) {
+                        if (workInfo.outputData.getBoolean(DATA_KEY_DOCUMENT_COPY_PROTECTED, false)) {
+                            documentDao.markDocumentAsCopyProtected(workInfo.documentId)
+                        }
                         documentDao.progressState(workInfo.documentId, State.Converted)
                     }
                 }
@@ -137,9 +137,7 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
             getDocumentCacheDir(appCacheDir = app.cacheDir, documentId).deleteRecursively()
             getDocumentFilesDir(appFilesDir = app.filesDir, documentId).deleteRecursively()
             documentDao.reloadDocument(documentId)
-            documentDao.getDocument(documentId).let {
-                convert(it)
-            }
+            convert(documentDao.getDocument(documentId))
         }
     }
 

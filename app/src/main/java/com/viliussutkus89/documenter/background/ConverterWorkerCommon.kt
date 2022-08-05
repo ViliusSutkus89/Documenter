@@ -18,7 +18,6 @@
 
 package com.viliussutkus89.documenter.background
 
-import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
@@ -30,9 +29,11 @@ import androidx.work.Data
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.multiprocess.RemoteListenableWorker
+import androidx.work.workDataOf
 import com.google.common.util.concurrent.ListenableFuture
 import com.viliussutkus89.documenter.R
 import java.io.File
+
 
 abstract class ConverterWorkerCommon(ctx: Context, params: WorkerParameters): RemoteListenableWorker(ctx, params) {
     companion object {
@@ -72,8 +73,8 @@ abstract class ConverterWorkerCommon(ctx: Context, params: WorkerParameters): Re
     }
 
     override fun getForegroundInfoAsync(): ListenableFuture<ForegroundInfo?> {
-        return CallbackToFutureAdapter.getFuture { completer: CallbackToFutureAdapter.Completer<ForegroundInfo?> ->
-            completer.set(ForegroundInfo(id.hashCode(), createNotification(applicationContext)))
+        return CallbackToFutureAdapter.getFuture {
+            it.set(ForegroundInfo(id.hashCode(), createNotification(applicationContext)))
         }
     }
 
@@ -85,6 +86,8 @@ abstract class ConverterWorkerCommon(ctx: Context, params: WorkerParameters): Re
 
     abstract fun doWorkSync(inputFile: File): File?
 
+    protected var copyProtected = false
+
     override fun startRemoteWork(): ListenableFuture<Result> {
         return CallbackToFutureAdapter.getFuture { completer: CallbackToFutureAdapter.Completer<Result> ->
 
@@ -94,7 +97,9 @@ abstract class ConverterWorkerCommon(ctx: Context, params: WorkerParameters): Re
                 return@getFuture completer.set(Result.failure())
             }
 
-            return@getFuture completer.set(Result.success())
+            return@getFuture completer.set(Result.success(workDataOf(
+                DATA_KEY_DOCUMENT_COPY_PROTECTED to copyProtected
+            )))
         }
     }
 }

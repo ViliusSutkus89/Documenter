@@ -65,7 +65,6 @@
     <string name="menu_settings">Settings</string>
     <string name="pdf2htmlex_header">pdf2htmlEX-Android</string>
     <string name="pdf2htmlex_outline_title">Outline</string>
-    <string name="pdf2htmlex_drm_title">Honor DRM</string>
     <string name="pdf2htmlex_annotations_title">Annotations</string>
     <string name="wvware_header">wvWare-Android</string>
     <string name="wvware_nographics_title">No graphics mode</string>

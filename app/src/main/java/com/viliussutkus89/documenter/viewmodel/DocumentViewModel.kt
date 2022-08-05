@@ -58,7 +58,7 @@ class DocumentViewModel(private val app: DocumenterApplication, private val docu
         }
     }
 
-    var document = documentDao.getFilenameSourceUriConvertedFilenameState(documentId).asLiveData()
+    var document = documentDao.getFilenameSourceUriConvertedFilenameStateCopyProtected(documentId).asLiveData()
 
     data class StateAndHtmlFile(
         val state: State,
@@ -87,6 +87,8 @@ class DocumentViewModel(private val app: DocumenterApplication, private val docu
             false
         }
     }
+
+    val isCopyProtected = Transformations.map(document) { it.copyProtected }
 
     val htmlFile: LiveData<File> = Transformations.map(document) {
         getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, it.convertedFilename)

@@ -170,6 +170,10 @@ class DocumentFragment: Fragment() {
                 menu.findItem(R.id.save).isVisible = false
             }
 
+            documentViewModel.isCopyProtected.observeOnce(viewLifecycleOwner) {
+                menu.findItem(R.id.save).isVisible = !it
+            }
+
             // Workaround for Issue #7
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
                 menu.findItem(R.id.open_with).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)

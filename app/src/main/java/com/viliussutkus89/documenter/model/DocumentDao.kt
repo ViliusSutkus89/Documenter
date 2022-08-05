@@ -41,8 +41,8 @@ interface DocumentDao {
     @Delete
     fun delete(document: Document)
 
-    @Query("SELECT `id`, `filename`, `converted_filename`, `source_uri`, `state` FROM `document` WHERE `id` = :id")
-    fun getFilenameSourceUriConvertedFilenameState(id: Long): Flow<DocumentScoped_Filename_SourceUri_ConvertedFilename_State>
+    @Query("SELECT `id`, `filename`, `converted_filename`, `source_uri`, `state`, `copy_protected` FROM `document` WHERE `id` = :id")
+    fun getFilenameSourceUriConvertedFilenameStateCopyProtected(id: Long): Flow<DocumentScoped_Filename_SourceUri_ConvertedFilename_State_CopyProtected>
 
     @Query("UPDATE `document` SET `last_accessed` = $CURRENT_TIMESTAMP WHERE `id` = :id")
     fun updateLastAccessed(id: Long)
@@ -64,4 +64,7 @@ interface DocumentDao {
 
     @Query("SELECT CASE WHEN COUNT(`source_uri`) = 1 THEN 1 ELSE 0 END FROM `document` WHERE `source_uri` = :uri")
     fun isUriUnique(uri: Uri): Boolean
+
+    @Query("UPDATE `document` SET `copy_protected` = 1 WHERE `id` = :id")
+    fun markDocumentAsCopyProtected(id: Long)
 }

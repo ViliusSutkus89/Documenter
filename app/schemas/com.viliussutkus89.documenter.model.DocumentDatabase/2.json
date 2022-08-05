@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "21856f40cb8dd2d19caac23731540986",
+    "identityHash": "448d1b8ed0220880ca22a84eae7ea7d3",
     "entities": [
       {
         "tableName": "Document",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `filename` TEXT NOT NULL, `source_uri` TEXT NOT NULL, `converted_filename` TEXT NOT NULL, `last_accessed` INTEGER NOT NULL, `state` INTEGER NOT NULL, `thumbnail_available` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `filename` TEXT NOT NULL, `source_uri` TEXT NOT NULL, `converted_filename` TEXT NOT NULL, `last_accessed` INTEGER NOT NULL, `state` INTEGER NOT NULL, `thumbnail_available` INTEGER NOT NULL, `copy_protected` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -49,6 +49,12 @@
             "columnName": "thumbnail_available",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "copyProtected",
+            "columnName": "copy_protected",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -74,7 +80,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '21856f40cb8dd2d19caac23731540986')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '448d1b8ed0220880ca22a84eae7ea7d3')"
     ]
   }
 }
