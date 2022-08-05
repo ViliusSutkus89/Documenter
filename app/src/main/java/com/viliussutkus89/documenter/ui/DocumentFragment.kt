@@ -104,14 +104,6 @@ class DocumentFragment: Fragment() {
                 } ?: let {
                     binding.documentView.loadUrl(getFileUri(doc.htmlFile).toString())
                 }
-
-                if ((requireActivity() as MainActivity).isIdlingResourceInitialized()) {
-                    binding.documentView.webViewClient = object : WebViewClient() {
-                        override fun onPageFinished(view: WebView?, url: String?) {
-                            (requireActivity() as MainActivity).decrementIdlingResource()
-                        }
-                    }
-                }
             } else {
                 binding.documentWrapper.visibility = View.GONE
                 binding.loading.visibility = View.VISIBLE
@@ -135,6 +127,13 @@ class DocumentFragment: Fragment() {
                 removeMenuProvider(documentMenu)
                 if (State.Converted == it) {
                     addMenuProvider(documentMenu, viewLifecycleOwner, Lifecycle.State.RESUMED)
+                }
+            }
+        }
+        if ((requireActivity() as MainActivity).isIdlingResourceInitialized()) {
+            binding.documentView.webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    (requireActivity() as MainActivity).decrementIdlingResource()
                 }
             }
         }
