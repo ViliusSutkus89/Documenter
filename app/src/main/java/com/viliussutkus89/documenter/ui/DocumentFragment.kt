@@ -126,8 +126,18 @@ class DocumentFragment: Fragment() {
                 binding.progressBar.visibility = if (State.Error == doc.state) View.INVISIBLE else View.VISIBLE
             }
         }
-        requireActivity().addMenuProvider(documentMenu, viewLifecycleOwner, Lifecycle.State.RESUMED)
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        documentViewModel.state.observe(viewLifecycleOwner) {
+            requireActivity().run {
+                removeMenuProvider(documentMenu)
+                if (State.Converted == it) {
+                    addMenuProvider(documentMenu, viewLifecycleOwner, Lifecycle.State.RESUMED)
+                }
+            }
+        }
     }
 
     override fun onPause() {

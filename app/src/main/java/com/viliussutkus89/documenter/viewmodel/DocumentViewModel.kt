@@ -71,6 +71,10 @@ class DocumentViewModel(private val app: DocumenterApplication, private val docu
         )
     }
 
+    val state = Transformations.map(document) {
+        it.state
+    }
+
     val canReload: LiveData<Boolean> = Transformations.map(document) {
         if (!Uri.EMPTY.equals(it.sourceUri)) {
             try {
