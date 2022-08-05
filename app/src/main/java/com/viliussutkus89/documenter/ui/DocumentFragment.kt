@@ -122,6 +122,8 @@ class DocumentFragment: Fragment() {
                     State.Converting -> R.string.state_converting
                     else -> R.string.state_error
                 })
+
+                binding.progressBar.visibility = if (State.Error == doc.state) View.INVISIBLE else View.VISIBLE
             }
         }
         requireActivity().addMenuProvider(documentMenu, viewLifecycleOwner, Lifecycle.State.RESUMED)
