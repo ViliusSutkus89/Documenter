@@ -40,6 +40,7 @@ import com.viliussutkus89.documenter.databinding.FragmentHomeBinding
 import com.viliussutkus89.documenter.viewmodel.ConverterViewModel
 import com.viliussutkus89.documenter.viewmodel.HomeViewModel
 
+
 class HomeFragment: Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -61,14 +62,14 @@ class HomeFragment: Fragment() {
     private fun openUri(uri: Uri) {
         when (uri.scheme) {
             ContentResolver.SCHEME_CONTENT -> {
-            (requireActivity() as MainActivity).incrementIdlingResource()
-            converterViewModel.convert(uri).observe(viewLifecycleOwner) { document ->
-                findNavController().navigate(
-                    HomeFragmentDirections.actionHomeFragmentToDocumentFragment(
-                        document.id, document.filename
+                (requireActivity() as MainActivity).incrementIdlingResource()
+                converterViewModel.convert(uri).observe(viewLifecycleOwner) { document ->
+                    findNavController().navigate(
+                        HomeFragmentDirections.actionHomeFragmentToDocumentFragment(
+                            document.id, document.filename
+                        )
                     )
-                )
-            }
+                }
             }
             else -> binding.root.doOnLayout {
                 Snackbar.make(it, R.string.error_file_scheme, Snackbar.LENGTH_LONG).show()
