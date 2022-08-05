@@ -7,41 +7,28 @@ import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.viliussutkus89.documenter.rule.CloseSystemDialogsTestRule
 import com.viliussutkus89.documenter.rule.ScreenshotFailedTestRule
 import com.viliussutkus89.documenter.ui.MainActivity
-import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 
 // https://github.com/ViliusSutkus89/Documenter/issues/5
 @RunWith(AndroidJUnit4::class)
 class AboutMenuItemVisibilityTest {
-    @get:Rule
-    val actionCloseSystemDialogsRule = CloseSystemDialogsTestRule()
+    private val scenarioRule: ActivityScenarioRule<MainActivity> = activityScenarioRule()
 
     @get:Rule
-    val screenshotFailedTestRule = ScreenshotFailedTestRule()
-
-    @get:Rule
-    var scenarioRule = activityScenarioRule<MainActivity>()
-
-    @Before
-    fun setUp() {
-        scenarioRule.scenario.onActivity {
-            screenshotFailedTestRule.activity = it
-        }
-    }
-
-    @After
-    fun tearDown() {
-        screenshotFailedTestRule.activity = null
-    }
+    val ruleChain: RuleChain = RuleChain
+        .outerRule(CloseSystemDialogsTestRule())
+        .around(scenarioRule)
+        .around(ScreenshotFailedTestRule(scenarioRule))
 
     @Test
     fun shownInHome_Test() {

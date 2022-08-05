@@ -21,16 +21,18 @@ package com.viliussutkus89.documenter.rule
 import android.app.Activity
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.screenshot.BasicScreenCaptureProcessor
 import androidx.test.runner.screenshot.Screenshot
+import com.viliussutkus89.documenter.ui.MainActivity
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.io.File
 import java.io.IOException
 
 
-class ScreenshotFailedTestRule: TestWatcher() {
+class ScreenshotFailedTestRule(private val scenario: ActivityScenarioRule<MainActivity>): TestWatcher() {
     companion object {
         private const val TAG = "ScreenFailedTestRule"
     }
@@ -56,11 +58,16 @@ class ScreenshotFailedTestRule: TestWatcher() {
     }
 
     // Activity required for API level <18
-    var activity: Activity? = null
+    private lateinit var activity: Activity
+
+    override fun starting(description: Description?) {
+        scenario.scenario.onActivity {
+            activity = it
+        }
+    }
 
     override fun failed(e: Throwable, description: Description) {
-        val capture = activity?.let { Screenshot.capture(it) } ?: Screenshot.capture()
-        capture.apply {
+        val capture = Screenshot.capture(activity).apply {
             name = description.testClass.simpleName + "-" + description.methodName
             format = Bitmap.CompressFormat.PNG
         }
