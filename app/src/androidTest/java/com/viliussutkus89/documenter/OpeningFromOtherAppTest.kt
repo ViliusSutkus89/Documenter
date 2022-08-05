@@ -21,6 +21,7 @@ package com.viliussutkus89.documenter
 import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingPolicies
@@ -30,24 +31,26 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.pressBack
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.viliussutkus89.android.assetextractor.AssetExtractor
+import com.viliussutkus89.documenter.rule.CloseSystemDialogsTestRule
+import com.viliussutkus89.documenter.rule.ScreenshotFailedTestRule
 import com.viliussutkus89.documenter.ui.MainActivity
 import org.junit.*
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.File
 import java.util.concurrent.TimeUnit
+
 
 @LargeTest
 @RunWith(Parameterized::class)
 class OpeningFromOtherAppTest {
     @Parameterized.Parameter
     lateinit var testFile: File
-
-    private lateinit var idlingResource: IdlingResource
-
     companion object {
         @BeforeClass @JvmStatic
         fun setIdlingTimeout() {
@@ -75,21 +78,28 @@ class OpeningFromOtherAppTest {
     }
 
     @get:Rule
+    val actionCloseSystemDialogsRule = CloseSystemDialogsTestRule()
+
+    @get:Rule
     val screenshotFailedTestRule = ScreenshotFailedTestRule()
 
-    @Before
-    fun setUp() {
+    private fun getIntent(): Intent {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         val authority = appContext.packageName + ".instrumentedTestsProvider"
         val uri = FileProvider.getUriForFile(appContext, authority, testFile)
-        val viewIntent = Intent(Intent.ACTION_VIEW, uri, appContext, MainActivity::class.java)
+        return Intent(Intent.ACTION_VIEW, uri, appContext, MainActivity::class.java)
             .putExtra(MainActivity.FORCE_INIT_IDLING_RESOURCE, true)
+    }
 
-        launchActivity<MainActivity>(viewIntent).onActivity { activity ->
+    private lateinit var idlingResource: IdlingResource
+
+    private lateinit var scenario: ActivityScenario<MainActivity>
+
+    @Before
+    fun setUp() {
+        scenario = launchActivity(getIntent())
+        scenario.onActivity { activity ->
             screenshotFailedTestRule.activity = activity
-
-            @Suppress("DEPRECATION") // ACTION_CLOSE_SYSTEM_DIALOGS is perfectly fine in tests
-            activity.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
             idlingResource = activity.idlingResource
             IdlingRegistry.getInstance().register(idlingResource)
         }
@@ -98,6 +108,8 @@ class OpeningFromOtherAppTest {
     @After
     fun tearDown() {
         IdlingRegistry.getInstance().unregister(idlingResource)
+        screenshotFailedTestRule.activity = null
+        scenario.close()
     }
 
     @Test

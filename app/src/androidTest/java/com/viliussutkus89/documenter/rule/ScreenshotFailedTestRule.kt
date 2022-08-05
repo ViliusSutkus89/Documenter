@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.viliussutkus89.documenter
+package com.viliussutkus89.documenter.rule
 
 import android.app.Activity
 import android.graphics.Bitmap
@@ -28,6 +28,7 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.io.File
 import java.io.IOException
+
 
 class ScreenshotFailedTestRule: TestWatcher() {
     companion object {
@@ -55,14 +56,10 @@ class ScreenshotFailedTestRule: TestWatcher() {
     }
 
     // Activity required for API level <18
-    lateinit var activity: Activity
+    var activity: Activity? = null
 
     override fun failed(e: Throwable, description: Description) {
-        val capture = if (::activity.isInitialized) {
-            Screenshot.capture(activity)
-        } else {
-            Screenshot.capture()
-        }
+        val capture = activity?.let { Screenshot.capture(it) } ?: Screenshot.capture()
         capture.apply {
             name = description.testClass.simpleName + "-" + description.methodName
             format = Bitmap.CompressFormat.PNG
