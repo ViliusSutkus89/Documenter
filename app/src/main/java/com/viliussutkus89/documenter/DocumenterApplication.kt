@@ -18,9 +18,11 @@
 
 package com.viliussutkus89.documenter
 
+import android.util.Log
 import androidx.multidex.MultiDexApplication
 import androidx.work.Configuration
 import com.viliussutkus89.documenter.model.DocumentDatabase
+
 
 class DocumenterApplication: MultiDexApplication(), Configuration.Provider {
     val documentDatabase: DocumentDatabase by lazy {
@@ -28,6 +30,9 @@ class DocumenterApplication: MultiDexApplication(), Configuration.Provider {
     }
 
     override fun getWorkManagerConfiguration(): Configuration {
-        return Configuration.Builder().setDefaultProcessName(packageName).build()
+        return Configuration.Builder()
+            .setDefaultProcessName(packageName)
+            .setMinimumLoggingLevel(Log.INFO)
+            .build()
     }
 }
