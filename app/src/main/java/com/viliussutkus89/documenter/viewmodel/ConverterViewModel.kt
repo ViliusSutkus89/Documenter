@@ -32,6 +32,7 @@ import androidx.work.WorkManager
 import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.background.*
 import com.viliussutkus89.documenter.model.*
+import com.viliussutkus89.documenter.ui.DocumentFragment
 import com.viliussutkus89.documenter.utils.getFilename
 import com.viliussutkus89.documenter.utils.getMimeType
 import kotlinx.coroutines.Dispatchers
@@ -40,8 +41,8 @@ import kotlinx.coroutines.launch
 
 class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewModel(app) {
     companion object {
-        val supportedMimeTypes = pdf2htmlEXWorker.SUPPORTED_MIME_TYPES + wvWareWorker.SUPPORTED_MIME_TYPES
         private const val TAG = "ConverterViewModel"
+        val supportedMimeTypes = pdf2htmlEXWorker.SUPPORTED_MIME_TYPES + wvWareWorker.SUPPORTED_MIME_TYPES
     }
 
     class Factory(private val application: DocumenterApplication): ViewModelProvider.Factory {
@@ -68,24 +69,30 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
                 workInfo.documentId != -1L
             }.forEach { workInfo ->
                 if (workInfo.state == WorkInfo.State.FAILED) {
+                    Log.d(TAG, "errorState(${workInfo.documentId})")
                     documentDao.errorState(workInfo.documentId)
                 }
                 else if (workInfo.state == WorkInfo.State.RUNNING) {
                     if (workInfo.tags.contains("SaveToCacheWork")) {
+                        Log.d(TAG, "progressState(${workInfo.documentId}, Caching)")
                         documentDao.progressState(workInfo.documentId, State.Caching)
                     }
                     else if (workInfo.tags.contains("ConvertWork")) {
+                        Log.d(TAG, "progressState(${workInfo.documentId}, Converting)")
                         documentDao.progressState(workInfo.documentId, State.Converting)
                     }
                 }
                 else if (workInfo.state == WorkInfo.State.SUCCEEDED) {
                     if (workInfo.tags.contains("SaveToCacheWork")) {
+                        Log.d(TAG, "progressState(${workInfo.documentId}, Cached)")
                         documentDao.progressState(workInfo.documentId, State.Cached)
                     }
                     else if (workInfo.tags.contains("ConvertWork")) {
                         if (workInfo.outputData.getBoolean(DATA_KEY_DOCUMENT_COPY_PROTECTED, false)) {
+                            Log.d(TAG, "markDocumentAsCopyProtected(${workInfo.documentId})")
                             documentDao.markDocumentAsCopyProtected(workInfo.documentId)
                         }
+                        Log.d(TAG, "progressState(${workInfo.documentId}, Converted)")
                         documentDao.progressState(workInfo.documentId, State.Converted)
                     }
                 }
@@ -97,6 +104,7 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
     private fun takePermission(uri: Uri) {
         if (app.checkUriPermission(uri, android.os.Process.myPid(), android.os.Process.myUid(), Intent.FLAG_GRANT_READ_URI_PERMISSION) == PackageManager.PERMISSION_GRANTED) {
             try {
+                Log.d(TAG, "takePersistableUriPermission($uri)")
                 app.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             } catch (se: SecurityException) {
             }
@@ -106,6 +114,7 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
     fun convert(uri: Uri): LiveData<Document> {
         val result = MutableLiveData<Document>()
         viewModelScope.launch(Dispatchers.IO) {
+            Log.d(TAG, "convert($uri)")
             val type = uri.getMimeType(app.contentResolver)
             val filename = uri.getFilename(app.contentResolver) ?: "Unknown file"
             val convertedFilename = if (pdf2htmlEXWorker.SUPPORTED_MIME_TYPES.contains(type)) {
@@ -134,6 +143,7 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
 
     fun reload(documentId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
+            Log.d(TAG, "reload($documentId)")
             getDocumentCacheDir(appCacheDir = app.cacheDir, documentId).deleteRecursively()
             getDocumentFilesDir(appFilesDir = app.filesDir, documentId).deleteRecursively()
             documentDao.reloadDocument(documentId)
@@ -142,6 +152,7 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
     }
 
     private fun convert(document: Document) {
+        Log.d(TAG, "convert(${document.id})")
         getDocumentCacheDir(appCacheDir = app.cacheDir, document.id).mkdirs()
         getDocumentFilesDir(appFilesDir = app.filesDir, document.id).mkdirs()
 

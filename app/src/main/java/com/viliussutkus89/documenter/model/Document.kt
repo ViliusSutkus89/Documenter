@@ -20,8 +20,10 @@ package com.viliussutkus89.documenter.model
 
 import android.net.Uri
 import androidx.room.*
+import com.viliussutkus89.documenter.R
 import java.io.File
 import java.util.*
+
 
 enum class State(val value: Int) {
     Error(-1),
@@ -30,6 +32,15 @@ enum class State(val value: Int) {
     Cached(150),
     Converting(200),
     Converted(300)
+}
+
+val State.stringRes: Int get() = when(this) {
+    State.Error -> R.string.state_error
+    State.Init -> R.string.state_init
+    State.Caching -> R.string.state_caching
+    State.Cached -> R.string.state_cached
+    State.Converting -> R.string.state_converting
+    State.Converted -> R.string.state_converted
 }
 
 @Entity(indices = [Index(value = ["last_accessed"])])

@@ -26,6 +26,7 @@ import android.graphics.Canvas
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -44,6 +45,7 @@ import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.databinding.FragmentDocumentBinding
 import com.viliussutkus89.documenter.model.State
+import com.viliussutkus89.documenter.model.stringRes
 import com.viliussutkus89.documenter.utils.observeOnce
 import com.viliussutkus89.documenter.viewmodel.ConverterViewModel
 import com.viliussutkus89.documenter.viewmodel.DocumentViewModel
@@ -52,6 +54,7 @@ import java.io.File
 
 class DocumentFragment: Fragment() {
     companion object {
+        private const val TAG = "DocumentFragment"
         private const val BUNDLE_KEY_DOCUMENT_VIEW = "BUNDLE_KEY_DOCUMENT_VIEW"
     }
 
@@ -80,6 +83,7 @@ class DocumentFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d(TAG, "onCreateView()")
         _binding = FragmentDocumentBinding.inflate(inflater, container, false)
 
         binding.documentView.settings.apply {
@@ -96,6 +100,7 @@ class DocumentFragment: Fragment() {
 
         savedWebViewBundle = savedInstanceState?.getBundle(BUNDLE_KEY_DOCUMENT_VIEW)
         documentViewModel.stateAndHtmlFile.observe(viewLifecycleOwner) { doc ->
+            Log.d(TAG, "stateAndHtmlFile.observe: doc.state == ${resources.getString(doc.state.stringRes)}")
             if (State.Converted == doc.state) {
                 binding.loading.visibility = View.GONE
                 binding.documentWrapper.visibility = View.VISIBLE
@@ -107,14 +112,7 @@ class DocumentFragment: Fragment() {
             } else {
                 binding.documentWrapper.visibility = View.GONE
                 binding.loading.visibility = View.VISIBLE
-                binding.loadingMessage.text = resources.getString(when (doc.state) {
-                    State.Init -> R.string.state_init
-                    State.Caching -> R.string.state_caching
-                    State.Cached -> R.string.state_cached
-                    State.Converting -> R.string.state_converting
-                    else -> R.string.state_error
-                })
-
+                binding.loadingMessage.text = resources.getString(doc.state.stringRes)
                 binding.progressBar.visibility = if (State.Error == doc.state) View.INVISIBLE else View.VISIBLE
             }
         }
@@ -132,6 +130,7 @@ class DocumentFragment: Fragment() {
         }
         binding.documentView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
+                Log.d(TAG, "onPageFinished()")
                 (requireActivity() as MainActivity).decrementIdlingResource()
             }
         }
@@ -140,6 +139,7 @@ class DocumentFragment: Fragment() {
     override fun onPause() {
         super.onPause()
         if (View.VISIBLE == binding.documentWrapper.visibility) {
+            Log.d(TAG, "Taking documentWrapper screenshot")
             val view = binding.documentWrapper
             val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
             view.draw(Canvas(bitmap))
@@ -180,6 +180,7 @@ class DocumentFragment: Fragment() {
         }
 
         private fun showSnackBar(@StringRes resId: Int) {
+            Log.d(TAG, "showSnackBar(${resources.getString(resId)})")
             Snackbar.make(binding.root, resId, Snackbar.LENGTH_LONG).show()
         }
 
@@ -189,6 +190,7 @@ class DocumentFragment: Fragment() {
                 if (document.copyProtected) {
                     showSnackBar(R.string.error_cannot_save_copy_protected_document)
                 } else {
+                    Log.d(TAG, "save")
                     registerForActivityResult<String, Uri>(ActivityResultContracts.CreateDocument("text/html")) {
                         it?.let {
                             documentViewModel.saveDocument(it)
@@ -201,6 +203,7 @@ class DocumentFragment: Fragment() {
         private fun openWith() {
             documentViewModel.htmlFile.observeOnce(viewLifecycleOwner) { htmlFile ->
                 try {
+                    Log.d(TAG, "openWith")
                     startActivity(Intent(Intent.ACTION_VIEW, getFileUri(htmlFile))
                         .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
                 } catch (e: ActivityNotFoundException) {
@@ -213,6 +216,7 @@ class DocumentFragment: Fragment() {
         private fun share() {
             documentViewModel.htmlFile.observeOnce(viewLifecycleOwner) { htmlFile ->
                 try {
+                    Log.d(TAG, "share")
                     startActivity(Intent(Intent.ACTION_SEND).apply {
                         type = "text/html"
                         putExtra(Intent.EXTRA_STREAM, getFileUri(htmlFile))
@@ -229,6 +233,7 @@ class DocumentFragment: Fragment() {
             savedWebViewBundle = null
             documentViewModel.canReload.observeOnce(viewLifecycleOwner) {
                 if (it) {
+                    Log.d(TAG, "reload")
                     (requireActivity() as MainActivity).incrementIdlingResource()
                     converterViewModel.reload(args.documentId)
                 } else {

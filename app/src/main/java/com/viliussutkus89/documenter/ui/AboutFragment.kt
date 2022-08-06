@@ -29,8 +29,8 @@ import com.viliussutkus89.documenter.BuildConfig
 import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.databinding.FragmentAboutBinding
 
-class AboutFragment: Fragment(R.layout.fragment_about) {
 
+class AboutFragment: Fragment(R.layout.fragment_about) {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

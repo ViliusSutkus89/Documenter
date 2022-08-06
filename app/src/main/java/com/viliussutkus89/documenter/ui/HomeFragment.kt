@@ -23,6 +23,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,6 +43,10 @@ import com.viliussutkus89.documenter.viewmodel.HomeViewModel
 
 
 class HomeFragment: Fragment() {
+    companion object {
+        private const val TAG = "HomeFragment"
+    }
+
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
@@ -55,7 +60,10 @@ class HomeFragment: Fragment() {
 
     private val openDocument = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         registerForActivityResult(ActivityResultContracts.OpenDocument()) {
-            it?.let { openUri(it) }
+            it?.let {
+                Log.d(TAG, "ActivityResultContracts.OpenDocument(${it})")
+                openUri(it)
+            }
         }
     } else null
 
@@ -86,6 +94,7 @@ class HomeFragment: Fragment() {
             else -> null
         }?.let {
             if (!homeViewModel.intentUriHandlerGate()) {
+                Log.d(TAG, "handleIntent(${it})")
                 openUri(it)
             }
         }
@@ -95,6 +104,7 @@ class HomeFragment: Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d(TAG, "onCreateView")
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         handleIntent(requireActivity().intent)
         return binding.root
@@ -113,6 +123,7 @@ class HomeFragment: Fragment() {
         val adapter = DocumentListAdapter(
             appCacheDir = requireContext().cacheDir,
             openListener = {
+                Log.d(TAG, "openListener(${it.filename})")
                 (requireActivity() as MainActivity).incrementIdlingResource()
                 findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToDocumentFragment(it.id, it.filename))
             },
