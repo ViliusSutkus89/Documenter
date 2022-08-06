@@ -20,6 +20,7 @@ package com.viliussutkus89.documenter.ui
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -104,18 +105,24 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     @VisibleForTesting
     internal val idlingResource by lazy {
-        CountingIdlingResource("${javaClass.name}.idlingResource")
+        CountingIdlingResource("${javaClass.name}.idlingResource", true)
     }
 
     internal fun incrementIdlingResource() {
         if (isRunningTest) {
+            Log.e("idlingResource", "increment")
             idlingResource.increment()
+        } else {
+            Log.e("idlingResource", "don't increment")
         }
     }
 
     internal fun decrementIdlingResource() {
         if (isRunningTest) {
+            Log.e("idlingResource", "decrement")
             idlingResource.decrement()
+        } else {
+            Log.e("idlingResource", "don't decrement")
         }
     }
 }
