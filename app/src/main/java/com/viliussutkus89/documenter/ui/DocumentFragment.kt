@@ -97,6 +97,7 @@ class DocumentFragment: Fragment() {
         savedWebViewBundle = savedInstanceState?.getBundle(BUNDLE_KEY_DOCUMENT_VIEW)
         documentViewModel.stateAndHtmlFile.observe(viewLifecycleOwner) { doc ->
             if (State.Converted == doc.state) {
+                // @TODO: this is executed twice
                 binding.loading.visibility = View.GONE
                 binding.documentWrapper.visibility = View.VISIBLE
                 savedWebViewBundle?.let {
@@ -132,7 +133,11 @@ class DocumentFragment: Fragment() {
         }
         binding.documentView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
-                (requireActivity() as MainActivity).decrementIdlingResource()
+                try {
+                    (requireActivity() as MainActivity).decrementIdlingResource()
+                } catch (_: IllegalStateException) {
+                    // Ignoring IllegalStateException.
+                }
             }
         }
     }
