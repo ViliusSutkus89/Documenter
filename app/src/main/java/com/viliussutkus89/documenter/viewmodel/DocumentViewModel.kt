@@ -64,12 +64,14 @@ class DocumentViewModel(private val app: DocumenterApplication, private val docu
         val state: State,
         val htmlFile: File
     )
-    val stateAndHtmlFile: LiveData<StateAndHtmlFile> = Transformations.map(document) {
-        StateAndHtmlFile(
-            state = it.state,
-            htmlFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, it.convertedFilename)
-        )
-    }
+    val stateAndHtmlFile: LiveData<StateAndHtmlFile> = Transformations.distinctUntilChanged(
+        Transformations.map(document) {
+            StateAndHtmlFile(
+                state = it.state,
+                htmlFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, it.convertedFilename)
+            )
+        }
+    )
 
     val state = Transformations.map(document) {
         it.state
