@@ -88,8 +88,6 @@ class DocumentViewModel(private val app: DocumenterApplication, private val docu
         }
     }
 
-    val isCopyProtected = Transformations.map(document) { it.copyProtected }
-
     val htmlFile: LiveData<File> = Transformations.map(document) {
         getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, it.convertedFilename)
     }
