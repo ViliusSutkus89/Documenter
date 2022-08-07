@@ -70,13 +70,6 @@ data class Document(
     val copyProtected: Boolean = false
 )
 
-data class DocumentScoped_Filename_State(
-    val id: Long,
-
-    val filename: String,
-
-    val state: State
-)
 
 data class DocumentScoped_Filename_SourceUri_ConvertedFilename_State_CopyProtected(
     val id: Long,
