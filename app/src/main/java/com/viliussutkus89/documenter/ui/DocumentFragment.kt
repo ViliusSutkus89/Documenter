@@ -44,6 +44,7 @@ import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.R
 import com.viliussutkus89.documenter.databinding.FragmentDocumentBinding
 import com.viliussutkus89.documenter.model.State
+import com.viliussutkus89.documenter.model.stringRes
 import com.viliussutkus89.documenter.utils.observeOnce
 import com.viliussutkus89.documenter.viewmodel.ConverterViewModel
 import com.viliussutkus89.documenter.viewmodel.DocumentViewModel
@@ -108,14 +109,7 @@ class DocumentFragment: Fragment() {
             } else {
                 binding.documentWrapper.visibility = View.GONE
                 binding.loading.visibility = View.VISIBLE
-                binding.loadingMessage.text = resources.getString(when (doc.state) {
-                    State.Init -> R.string.state_init
-                    State.Caching -> R.string.state_caching
-                    State.Cached -> R.string.state_cached
-                    State.Converting -> R.string.state_converting
-                    else -> R.string.state_error
-                })
-
+                binding.loadingMessage.text = resources.getString(doc.state.stringRes)
                 binding.progressBar.visibility = if (State.Error == doc.state) View.INVISIBLE else View.VISIBLE
             }
         }
