@@ -14,11 +14,11 @@ android {
         minSdk 16
         targetSdk 32
 
-        versionCode 40
-        versionName "1.0.4"
+        versionCode 50
+        versionName "1.0.5"
 
         if (project.hasProperty('test_build')) {
-            versionName += '.unreleased'
+            versionName += '1.0.5'
         }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -58,7 +58,7 @@ android {
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
     buildTypes.debug {
-        android.defaultConfig.versionName += '.debug'
+        android.defaultConfig.versionName += '1.0.5'
     }
 
     packagingOptions {
