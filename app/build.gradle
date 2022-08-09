@@ -18,7 +18,7 @@ android {
         versionName "1.0.5"
 
         if (project.hasProperty('test_build')) {
-            versionName += '1.0.5'
+            versionNameSuffix = ".unreleased"
         }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -58,7 +58,7 @@ android {
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
     buildTypes.debug {
-        android.defaultConfig.versionName += '1.0.5'
+        versionNameSuffix = ".debug"
     }
 
     packagingOptions {

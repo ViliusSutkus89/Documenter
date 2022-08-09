@@ -49,7 +49,7 @@ class Versioner:
         with open(self.version_file) as fread:
             with open(tmp_file, 'w') as fwrite:
                 for line in fread:
-                    if 'versionName' in line:
+                    if 'versionName' in line.split(' '):
                         separator = '"' if '"' in line else "'"
                         splits = line.split(separator)
                         splits[1] = self.version_name
