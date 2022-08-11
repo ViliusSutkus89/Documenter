@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.preference.PreferenceFragmentCompat
 import com.viliussutkus89.documenter.R
 
+
 class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
@@ -16,7 +17,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         (requireActivity() as MainActivity).setMainMenuVisibility(false)
         return super.onCreateView(inflater, container, savedInstanceState)
     }
