@@ -5,6 +5,8 @@ Reference application for [pdf2htmlEX-Android](https://github.com/ViliusSutkus89
 [![Get Documenter on Google Play!](/badges/en_badge_web_generic_cropped_60.png)](https://play.google.com/store/apps/details?id=com.viliussutkus89.documenter&utm_source=HomePage)
 [![Documenter is available on Amazon Appstore!](/badges/amazon-appstore-badge-english-white_60.png)](https://www.amazon.com/dp/B0B787D678)
 
+![Screenshot](/images/home.png)
+
 # Requirements
 
 Documenter requires Android 4.1 (Jelly Bean, API level 16) or newer.
