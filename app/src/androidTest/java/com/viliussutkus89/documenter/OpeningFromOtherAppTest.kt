@@ -1,7 +1,7 @@
 /*
  * OpeningFromOtherAppTest.kt
  *
- * Copyright (C) 2022 ViliusSutkus89.com
+ * Copyright (C) 2022 https://www.ViliusSutkus89.com/documenter/
  *
  * Documenter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3,
@@ -86,8 +86,8 @@ class OpeningFromOtherAppTest(private val testFile: File) {
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
-        .outerRule(CloseSystemDialogsTestRule())
-        .around(scenarioRule)
+        .outerRule(scenarioRule)
+        .around(CloseSystemDialogsTestRule())
         .around(ScreenshotFailedTestRule(scenarioRule))
         .around(IdlingResourceRule(scenarioRule))
 
