@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2022 https://www.ViliusSutkus89.com/documenter/
  *
- * I am Speed is free software: you can redistribute it and/or modify
+ * Documenter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3,
  * as published by the Free Software Foundation.
  *
