@@ -2,7 +2,7 @@
 buildscript {
     ext.versions = [:]
     versions.lifecycle = '2.5.1'
-    versions.navigation = '2.5.1'
+    versions.navigation = '2.5.2'
 
     versions.work = '2.7.1'
     versions.room = '2.4.3'
