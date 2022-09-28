@@ -8,6 +8,7 @@ plugins {
 
 android {
     compileSdk 32
+    namespace 'com.viliussutkus89.documenter'
 
     defaultConfig {
         applicationId "com.viliussutkus89.documenter"
