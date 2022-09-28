@@ -82,7 +82,14 @@ class HomeFragment: Fragment() {
             // ACTION_VIEW sends URI in data field
             Intent.ACTION_VIEW -> intent.data
             // ACTION_SEND sends URI in parcelable extra
-            Intent.ACTION_SEND -> intent.getParcelableExtra(Intent.EXTRA_STREAM)
+            Intent.ACTION_SEND -> {
+                if (Build.VERSION.SDK_INT >= 33) {
+                    intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                }  else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(Intent.EXTRA_STREAM)
+                }
+            }
             else -> null
         }?.let {
             if (!homeViewModel.intentUriHandlerGate()) {

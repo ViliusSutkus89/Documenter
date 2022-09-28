@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId "com.viliussutkus89.documenter"
         minSdk 16
-        targetSdk 32
+        targetSdk 33
 
         versionCode 60
         versionName "1.0.6"
