@@ -19,6 +19,7 @@ android {
 
         if (project.hasProperty('test_build')) {
             versionNameSuffix = ".unreleased"
+            applicationIdSuffix = ".unreleased"
         }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -59,6 +60,7 @@ android {
     }
     buildTypes.debug {
         versionNameSuffix = ".debug"
+        applicationIdSuffix = ".debug"
     }
 
     packagingOptions {
