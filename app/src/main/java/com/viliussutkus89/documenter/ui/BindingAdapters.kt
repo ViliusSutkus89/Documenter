@@ -27,11 +27,16 @@ import com.viliussutkus89.documenter.model.Document
 import com.viliussutkus89.documenter.model.State
 import com.viliussutkus89.documenter.model.getThumbnail
 import java.io.File
+import java.io.FileNotFoundException
 
 @BindingAdapter("documentThumbnail", "cacheDir")
 fun setDocumentThumbnail(imageView: ImageView, document: Document, appCacheDir: File) {
     if (document.thumbnailAvailable) {
-        imageView.setImageURI(getThumbnail(appCacheDir = appCacheDir, document.id).toUri())
+        try {
+            imageView.setImageURI(getThumbnail(appCacheDir = appCacheDir, document.id).toUri())
+        } catch (e: FileNotFoundException) {
+            imageView.setImageResource(R.drawable.ic_folder_open)
+        }
     } else {
         imageView.setImageResource(
             when (document.state) {
