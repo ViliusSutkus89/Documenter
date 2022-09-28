@@ -68,7 +68,7 @@ class pdf2htmlEXWorker(ctx: Context, params: WorkerParameters): ConverterWorkerC
         return try {
             converter = pdf2htmlEX(applicationContext)
             converter.setInputPDF(inputFile)
-            converter.setOutline(inputData.getBoolean(SETTING_KEY_OUTLINE, false))
+            converter.setProcessOutline(inputData.getBoolean(SETTING_KEY_OUTLINE, false))
             converter.setProcessAnnotation(inputData.getBoolean(SETTING_KEY_ANNOTATIONS, false))
             try {
                 converter.convert()
