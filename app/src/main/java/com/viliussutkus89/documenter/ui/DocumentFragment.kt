@@ -127,7 +127,7 @@ class DocumentFragment: Fragment() {
         }
         binding.documentView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
-                (requireActivity() as MainActivity).decrementIdlingResource()
+                (activity as MainActivity?)?.decrementIdlingResource()
             }
         }
     }
