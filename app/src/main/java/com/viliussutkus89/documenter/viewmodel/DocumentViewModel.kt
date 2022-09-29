@@ -28,6 +28,7 @@ import com.viliussutkus89.documenter.DocumenterApplication
 import com.viliussutkus89.documenter.background.SaveWorker
 import com.viliussutkus89.documenter.model.State
 import com.viliussutkus89.documenter.model.getConvertedHtmlFile
+import com.viliussutkus89.documenter.model.getDocumentCacheDir
 import com.viliussutkus89.documenter.model.getThumbnail
 import com.viliussutkus89.documenter.utils.observeOnce
 import kotlinx.coroutines.Dispatchers
@@ -96,6 +97,7 @@ class DocumentViewModel(private val app: DocumenterApplication, private val docu
 
     fun saveThumbnail(bitmap: Bitmap) {
         viewModelScope.launch(Dispatchers.IO) {
+            getDocumentCacheDir(appCacheDir = app.cacheDir, documentId).mkdirs()
             FileOutputStream(getThumbnail(appCacheDir = app.cacheDir, documentId)).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 50, out)
             }
