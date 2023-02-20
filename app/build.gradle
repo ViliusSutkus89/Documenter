@@ -3,7 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'androidx.navigation.safeargs.kotlin' version '2.5.0'
     id 'kotlin-kapt'
-    id "com.mikepenz.aboutlibraries.plugin" version "8.9.4"
+    id "com.mikepenz.aboutlibraries.plugin" version "10.6.0"
 }
 
 android {
@@ -121,7 +121,7 @@ dependencies {
     implementation 'com.viliussutkus89:wvware-android:1.2.8'
 
     // AboutLibraries-v10 requires AndroidSDK-21
-    implementation "com.mikepenz:aboutlibraries:8.9.4"
+    implementation "com.mikepenz:aboutlibraries:10.6.0"
 
     androidTestImplementation "androidx.test.ext:junit:$versions.junit"
     androidTestImplementation "androidx.test.ext:junit-ktx:$versions.junit"
