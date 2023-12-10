@@ -29,10 +29,8 @@ class DocumenterApplication: MultiDexApplication(), Configuration.Provider {
         DocumentDatabase.getDatabase(this)
     }
 
-    override fun getWorkManagerConfiguration(): Configuration {
-        return Configuration.Builder()
-            .setDefaultProcessName(packageName)
-            .setMinimumLoggingLevel(Log.INFO)
-            .build()
-    }
+    override val workManagerConfiguration: Configuration get() = Configuration.Builder()
+        .setDefaultProcessName(packageName)
+        .setMinimumLoggingLevel(Log.INFO)
+        .build()
 }

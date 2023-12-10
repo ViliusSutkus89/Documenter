@@ -62,7 +62,7 @@ class ConverterViewModel(private val app: DocumenterApplication) : AndroidViewMo
             ?.toLong() ?: -1L
 
     private val documentWorkInfoList: LiveData<List<WorkInfo>> = workManager.getWorkInfosByTagLiveData("DocumentWork")
-    val workWatcher: LiveData<Unit> = Transformations.map(documentWorkInfoList) { workInfoListUnfiltered ->
+    val workWatcher: LiveData<Unit> = documentWorkInfoList.map { workInfoListUnfiltered ->
         viewModelScope.launch(Dispatchers.IO) {
             workInfoListUnfiltered.filter { workInfo ->
                 workInfo.documentId != -1L

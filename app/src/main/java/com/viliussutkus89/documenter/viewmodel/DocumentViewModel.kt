@@ -65,20 +65,19 @@ class DocumentViewModel(private val app: DocumenterApplication, private val docu
         val state: State,
         val htmlFile: File
     )
-    val stateAndHtmlFile: LiveData<StateAndHtmlFile> = Transformations.distinctUntilChanged(
-        Transformations.map(document) {
-            StateAndHtmlFile(
-                state = it.state,
-                htmlFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, it.convertedFilename)
-            )
-        }
-    )
 
-    val state = Transformations.map(document) {
+    val stateAndHtmlFile: LiveData<StateAndHtmlFile> = document.map {
+        StateAndHtmlFile(
+            state = it.state,
+            htmlFile = getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, it.convertedFilename)
+        )
+    }.distinctUntilChanged()
+
+    val state = document.map {
         it.state
     }
 
-    val canReload: LiveData<Boolean> = Transformations.map(document) {
+    val canReload: LiveData<Boolean> = document.map {
         if (!Uri.EMPTY.equals(it.sourceUri)) {
             try {
                 app.contentResolver.openInputStream(it.sourceUri)
@@ -91,7 +90,7 @@ class DocumentViewModel(private val app: DocumenterApplication, private val docu
         }
     }
 
-    val htmlFile: LiveData<File> = Transformations.map(document) {
+    val htmlFile: LiveData<File> = document.map {
         getConvertedHtmlFile(appFilesDir = app.filesDir, documentId, it.convertedFilename)
     }
 
