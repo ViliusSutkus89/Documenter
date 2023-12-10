@@ -64,7 +64,7 @@ class OpeningFromOtherAppTest(private val testFile: File) {
                 .extract(instrumentation.targetContext.cacheDir, "testFiles")
         }
 
-        @Parameterized.Parameters @JvmStatic
+        @Parameterized.Parameters(name = "{0}") @JvmStatic
         fun listPDFs(): List<File> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val extractedToDir = File(instrumentation.targetContext.cacheDir, "testFiles")
