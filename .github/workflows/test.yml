@@ -1,6 +1,6 @@
 # test.yml
 #
-# Copyright (C) 2022 ViliusSutkus89.com
+# Copyright (C) 2022, 2023 ViliusSutkus89.com
 #
 # Documenter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3,
@@ -40,10 +40,10 @@ env:
 
 jobs:
   releaseBuild:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
@@ -75,10 +75,10 @@ jobs:
         run: diff <(git status app/schemas --short) <(echo -n "")
 
   debugBuild:
-    runs-on: macos-11
+    runs-on: macos-13
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
@@ -99,7 +99,7 @@ jobs:
   test:
     needs: debugBuild
     # Only macos VMs are available with exposed CPU extensions to run hardware accelerated emulator
-    runs-on: macos-11
+    runs-on: macos-13
     strategy:
       fail-fast: false
       matrix:
@@ -117,8 +117,8 @@ jobs:
 #            api-level: 33
 #            api-type-target: google_apis
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
