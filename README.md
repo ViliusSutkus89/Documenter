@@ -9,7 +9,7 @@ Reference application for [pdf2htmlEX-Android](https://github.com/ViliusSutkus89
 
 # Requirements
 
-Documenter requires Android 4.1 (Jelly Bean, API level 16) or newer.
+Documenter requires Android 5 (Lollipop, API level 21) or newer.
 
 # Privacy policy
 

@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId "com.viliussutkus89.documenter"
-        minSdk 16
+        minSdk 21
         targetSdk 33
 
         versionCode 80
@@ -119,7 +119,8 @@ dependencies {
 
     // androidx.webkit:webkit:1.9.0-alpha01 is the latest to support older APIs (14), beta01 requires api level 19
     implementation 'androidx.webkit:webkit:1.9.0'
-    implementation 'com.viliussutkus89:pdf2htmlex-android:0.18.19'
+
+    implementation 'com.viliussutkus89:pdf2htmlex-android:0.18.20'
     implementation 'com.viliussutkus89:wvware-android:1.2.8'
 
     // AboutLibraries-v10 requires AndroidSDK-21
