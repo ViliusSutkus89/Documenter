@@ -104,19 +104,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Oldest provisionally supported API
-          - arch: x86
-            api-level: 16
-            api-type-target: default
-          # Oldest properly supported API
-          - arch: x86
-            api-level: 19
-            api-type-target: default
           # Oldest 64 bit
           - arch: x86_64
             api-level: 21
             api-type-target: default
-          # targetSdk
           - arch: x86_64
             api-level: 32
             api-type-target: google_apis
