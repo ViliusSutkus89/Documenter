@@ -15,8 +15,8 @@ android {
         minSdk 21
         targetSdk 33
 
-        versionCode 90
-        versionName "1.0.9"
+        versionCode 100
+        versionName "1.0.10"
 
         if (project.hasProperty('test_build')) {
             versionNameSuffix = ".unreleased"
