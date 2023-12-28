@@ -1,1 +1,1 @@
-pdf2htmlEX updated to 0.18.8.rc2
+Update pdf2htmlEX-Android to 0.18.20
