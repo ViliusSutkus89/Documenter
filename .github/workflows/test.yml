@@ -58,14 +58,14 @@ jobs:
           SIGNING_ALIAS: alias1
 
       - name: artifact release builds
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: APKs
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
 
       - name: Artifact lint report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: app/build/reports/lint-results-release.html
           name: lintResults
@@ -90,7 +90,7 @@ jobs:
         run: tar -cf app-build.tar app/build
 
       - name: artifact app/build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-build.tar
           path: app-build.tar
@@ -151,7 +151,7 @@ jobs:
         if: ${{ ! steps.avd-cache.outputs.cache-hit }}
 
       - name: Download app/build artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-build.tar
       - run: tar -xf app-build.tar
@@ -190,7 +190,7 @@ jobs:
 
             test ! -f sorry_but_tests_are_failing
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: testResults-${{ matrix.api-level }}-${{ matrix.arch }}-${{ matrix.api-type-target }}
