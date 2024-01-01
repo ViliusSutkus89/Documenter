@@ -67,12 +67,12 @@ android {
             val signingKeyfile: String? = System.getenv("SIGNING_KEYFILE")
             val signingAlias: String? = System.getenv("SIGNING_ALIAS")
             val signingPass: String? = System.getenv("SIGNING_PASS")
-            if (!listOf(signingKeyfile, signingAlias, signingPass).contains(null)) {
+            if (signingKeyfile != null && signingAlias != null && signingPass != null) {
                 signingConfigs.getByName("release") {
-                    storeFile = file(System.getenv("SIGNING_KEYFILE"))
-                    storePassword = System.getenv("SIGNING_PASS")
-                    keyAlias = System.getenv("SIGNING_ALIAS")
-                    keyPassword = System.getenv("SIGNING_PASS")
+                    storeFile = file(signingKeyfile)
+                    storePassword = signingPass
+                    keyAlias = signingAlias
+                    keyPassword = signingPass
                 }
                 signingConfig = signingConfigs.getByName("release")
             }
