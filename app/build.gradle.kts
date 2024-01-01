@@ -2,7 +2,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("androidx.navigation.safeargs.kotlin")
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
+    id("kotlin-kapt") // kapt is required for data binding
     id("com.mikepenz.aboutlibraries.plugin")
 }
 
@@ -29,11 +30,7 @@ android {
 
         multiDexEnabled = true
 
-        kapt {
-            arguments {
-                arg("room.schemaLocation", "$projectDir/schemas")
-            }
-        }
+        ksp.arg("room.schemaLocation", "$projectDir/schemas")
     }
     buildFeatures {
         viewBinding = true
@@ -116,7 +113,7 @@ dependencies {
     implementation("androidx.concurrent:concurrent-futures:1.1.0")
     implementation("androidx.preference:preference:1.2.1")
 
-    kapt("androidx.room:room-compiler:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
 
     implementation("androidx.webkit:webkit:1.9.0")
