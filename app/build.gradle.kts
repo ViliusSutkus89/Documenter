@@ -68,7 +68,7 @@ android {
             val signingAlias: String? = System.getenv("SIGNING_ALIAS")
             val signingPass: String? = System.getenv("SIGNING_PASS")
             if (signingKeyfile != null && signingAlias != null && signingPass != null) {
-                signingConfigs.getByName("release") {
+                signingConfigs.create("release") {
                     storeFile = file(signingKeyfile)
                     storePassword = signingPass
                     keyAlias = signingAlias
