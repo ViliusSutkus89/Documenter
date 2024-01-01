@@ -46,7 +46,7 @@ class AboutMenuItemVisibilityTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(scenarioRule)
         .around(CloseSystemDialogsTestRule())
-        .around(ScreenshotFailedTestRule(scenarioRule))
+        .around(ScreenshotFailedTestRule())
 
     @Test
     fun shownInHome_Test() {

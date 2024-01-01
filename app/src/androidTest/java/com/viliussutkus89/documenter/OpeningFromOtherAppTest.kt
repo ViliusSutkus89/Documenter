@@ -88,7 +88,7 @@ class OpeningFromOtherAppTest(private val testFile: File) {
     val ruleChain: RuleChain = RuleChain
         .outerRule(scenarioRule)
         .around(CloseSystemDialogsTestRule())
-        .around(ScreenshotFailedTestRule(scenarioRule))
+        .around(ScreenshotFailedTestRule())
         .around(IdlingResourceRule(scenarioRule))
 
     @Test
