@@ -22,7 +22,7 @@ import shutil
 class Versioner:
     def __init__(self):
         here = pathlib.Path(__file__).parent.resolve()
-        self.version_file = os.path.abspath(here.parent / 'app' / 'build.gradle')
+        self.version_file = os.path.abspath(here.parent / 'app' / 'build.gradle.kts')
 
         self.version_name = None
         self.version_code = None
