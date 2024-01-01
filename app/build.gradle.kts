@@ -88,7 +88,10 @@ android {
 
     packagingOptions.jniLibs {
         pickFirsts.add("**/libc++_shared.so")
+        keepDebugSymbols.add("**/libpdf2htmlEX-android.so")
+        keepDebugSymbols.add("**/libwvware-android.so")
     }
+    ndkVersion = "26.1.10909125"
 
     lint.abortOnError = false
 }
