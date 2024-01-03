@@ -84,7 +84,6 @@ android {
     }
 
     packagingOptions.jniLibs {
-        pickFirsts.add("**/libc++_shared.so")
         keepDebugSymbols.add("**/libpdf2htmlEX-android.so")
         keepDebugSymbols.add("**/libwvware-android.so")
     }
@@ -118,8 +117,8 @@ dependencies {
 
     implementation("androidx.webkit:webkit:1.9.0")
 
-    implementation("com.viliussutkus89:pdf2htmlex-android:0.18.22")
-    implementation("com.viliussutkus89:wvware-android:1.2.8")
+    implementation("com.viliussutkus89:pdf2htmlex-android:0.18.23")
+    implementation("com.viliussutkus89:wvware-android:1.2.9")
 
     implementation("com.mikepenz:aboutlibraries:10.10.0")
 
