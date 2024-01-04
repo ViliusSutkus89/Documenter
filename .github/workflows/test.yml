@@ -94,7 +94,7 @@ jobs:
       api-level: ${{ matrix.api-level }}
       arch: ${{ matrix.arch }}
       api-type-target: ${{ matrix.api-type-target }}
-      applicationId: ${{ env.applicationId }}
+      applicationId: $applicationId
 
   instrumentedTests-default-target:
     needs: releaseBuild
@@ -115,4 +115,4 @@ jobs:
       api-level: ${{ matrix.api-level }}
       arch: ${{ matrix.arch }}
       api-type-target: ${{ matrix.api-type-target }}
-      applicationId: ${{ env.applicationId }}
+      applicationId: $applicationId
