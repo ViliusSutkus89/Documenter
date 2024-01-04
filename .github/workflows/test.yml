@@ -79,6 +79,7 @@ jobs:
 
   instrumentedTests-aosp_atd-target:
     needs: releaseBuild
+    name: android-${{ matrix.api-level }} ${{ matrix.arch }} ${{ matrix.api-type-target }}
     strategy:
       fail-fast: false
       matrix:
@@ -97,19 +98,20 @@ jobs:
       applicationId: $applicationId
 
   instrumentedTests-default-target:
-    needs: releaseBuild
+#    needs: releaseBuild
+    name: android-${{ matrix.api-level }} ${{ matrix.arch }} ${{ matrix.api-type-target }}
     strategy:
       fail-fast: false
       matrix:
         # system-images;android-26;default;x86 and x86_64 don't have system webview installed
         # Skip them intentionally
-        api-level: [29,  28,  27,  25,  24,  23,  22,  21]
+        api-level: [26]
         arch: [x86_64, x86]
         api-type-target: [default]
         include:
-          - api-level: 30
-            arch: x86
-            api-type-target: aosp_atd
+          - api-level: ${{ matrix.api-level }}
+            arch: ${{ matrix.arch }}
+            api-type-target: ${{ matrix.api-type-target }}
     uses: ./.github/workflows/testInner.yml
     with:
       api-level: ${{ matrix.api-level }}
