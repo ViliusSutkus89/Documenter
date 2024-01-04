@@ -57,7 +57,10 @@ class ScreenshotFailedTestRule: TestWatcher() {
 
     override fun failed(e: Throwable, description: Description) {
         getStorageDir()?.let { storageDir ->
-            val outputFile = storageDir.resolve(description.testClass.simpleName + "-" + description.methodName + ".png")
+            val fileName = (description.testClass.simpleName + "-" + description.methodName).filter {
+                it.isLetterOrDigit() || listOf('-', '_', '.').contains(it)
+            }
+            val outputFile = storageDir.resolve("$fileName.png")
             FileOutputStream(outputFile).use { outputFileStream ->
                 val bitmap = if (Build.VERSION.SDK_INT >= 18) {
                     takeScreenshotNoSync()
