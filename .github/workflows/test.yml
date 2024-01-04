@@ -52,7 +52,7 @@ jobs:
       - name: Generate ephemeral keystore
         run: keytool -genkey -noprompt -alias alias1 -dname "CN=$applicationId.ephemeral, OU=EphemeralSignatures, O=ViliusSutkus89.com, L=Kaunas, S=Kaunas, C=LT" -keystore app/$applicationId.ephemeral.jks -keypass 123456 -keyalg RSA -keysize 4096 -validity 1 -storepass 123456
 
-      - run: ./gradlew assembleRelease lintRelease -Ptest_build
+      - run: ./gradlew assembleRelease bundleRelease lintRelease -Ptest_build
         env:
           SIGNING_KEYFILE: ${{env.applicationId}}.ephemeral.jks
           SIGNING_PASS: 123456
@@ -62,7 +62,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: APKs
-          path: app/build/outputs/apk/release/*.apk
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
 
       - name: Artifact lint report
