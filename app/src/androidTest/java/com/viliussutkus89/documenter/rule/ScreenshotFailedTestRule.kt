@@ -31,6 +31,11 @@ import org.junit.runner.Description
 import java.io.File
 import java.io.FileOutputStream
 
+// AGP (I believe 8.1) uninstalls APK after running instrumented tests.
+// This is undesirable, because this TestRule saves screenshots to private cache location,
+// which is removed after uninstalling.
+// Keep the following line in gradle.properties:
+// android.injected.androidTest.leaveApksInstalledAfterRun=true
 
 class ScreenshotFailedTestRule: TestWatcher() {
 
