@@ -140,7 +140,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [29,  28,  27,  26,  25,  24,  23,  22,  21]
+        # system-images;android-26;default;x86 and x86_64 don't have system webview installed
+        # Skip them intentionally
+        api-level: [29,  28,  27,  25,  24,  23,  22,  21]
         arch: [x86_64, x86]
         api-type-target: [default]
     steps:
