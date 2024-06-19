@@ -28,7 +28,8 @@ jobs:
           java-version: 17
       - uses: android-actions/setup-android@v3
 
-      - run: pip3 install adbPullAs
+      # @TODO: remove --break-system-packages once python is sorted
+      - run: pip3 install adbPullAs --break-system-packages
 
       - name: Enable KVM group perms
         run: |
