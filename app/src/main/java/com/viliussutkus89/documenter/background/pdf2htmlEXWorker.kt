@@ -24,7 +24,7 @@ import androidx.preference.PreferenceManager
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkerParameters
-import com.viliussutkus89.android.pdf2htmlex.pdf2htmlEX
+import app.opendocument.android.pdf2htmlex.pdf2htmlEX
 import java.io.File
 import java.io.IOException
 

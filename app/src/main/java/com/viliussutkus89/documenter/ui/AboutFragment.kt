@@ -39,7 +39,7 @@ class AboutFragment: Fragment(R.layout.fragment_about) {
         (requireActivity() as MainActivity).setMainMenuVisibility(false)
         return FragmentAboutBinding.inflate(inflater, container, false).apply {
             documenterVersion = BuildConfig.VERSION_NAME
-            pdf2htmlEXVersion = com.viliussutkus89.android.pdf2htmlex.BuildConfig.VERSION_NAME
+            pdf2htmlEXVersion = app.opendocument.android.pdf2htmlex.BuildConfig.VERSION_NAME
             wvWareVersion = com.viliussutkus89.android.wvware.BuildConfig.VERSION_NAME
         }.root
     }
