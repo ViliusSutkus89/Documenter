@@ -19,12 +19,8 @@
 package com.viliussutkus89.documenter.rule
 
 import android.graphics.Bitmap
-import android.os.Build
 import android.util.Log
 import androidx.test.core.app.takeScreenshotNoSync
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.matcher.ViewMatchers.isRoot
-import androidx.test.espresso.screenshot.captureToBitmap
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -67,12 +63,14 @@ class ScreenshotFailedTestRule: TestWatcher() {
             }
             val outputFile = storageDir.resolve("$fileName.png")
             FileOutputStream(outputFile).use { outputFileStream ->
-                val bitmap = if (Build.VERSION.SDK_INT >= 18) {
-                    takeScreenshotNoSync()
-                } else {
-                    onView(isRoot()).captureToBitmap()
-                }
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputFileStream)
+//                val bitmap = if (Build.VERSION.SDK_INT >= 18) {
+//                    takeScreenshotNoSync()
+//                } else {
+//                    import androidx.test.espresso.screenshot.captureToBitmap
+//                    onView(isRoot()).captureToBitmap()
+//                }
+//                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputFileStream)
+                takeScreenshotNoSync().compress(Bitmap.CompressFormat.PNG, 100, outputFileStream)
             }
         }
     }
