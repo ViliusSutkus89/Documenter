@@ -14,7 +14,7 @@ android {
     defaultConfig {
         applicationId = "com.viliussutkus89.documenter"
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
 
         versionCode = 130
         versionName = "1.0.13"

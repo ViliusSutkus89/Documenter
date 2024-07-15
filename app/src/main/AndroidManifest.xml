@@ -4,6 +4,7 @@
 
     <uses-feature android:name="android.software.webview" android:required="true" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
         android:name=".DocumenterApplication"
@@ -28,11 +29,13 @@
         <service
             android:name=".background.pdf2htmlEXWorker$RemoteWorkerService"
             android:exported="false"
+            android:foregroundServiceType="dataSync"
             android:process=":pdf2htmlEXWorker" />
 
         <service
             android:name=".background.wvWareWorker$RemoteWorkerService"
             android:exported="false"
+            android:foregroundServiceType="dataSync"
             android:process=":wvWareWorker" />
 
         <activity android:name=".ui.MainActivity" android:exported="true">
