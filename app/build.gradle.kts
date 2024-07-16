@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.viliussutkus89.documenter"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.viliussutkus89.documenter"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
 
         versionCode = 130
         versionName = "1.0.13"
