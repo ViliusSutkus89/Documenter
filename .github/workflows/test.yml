@@ -86,6 +86,8 @@ jobs:
       fail-fast: false
       matrix:
         emulator:
+          # No android-35 aosp_atd
+          - {'api_level': 35, 'api_type_target': 'google_apis', 'arch': 'x86_64'}
           - {'api_level': 34, 'api_type_target': 'aosp_atd', 'arch': 'x86_64'}
           - {'api_level': 33, 'api_type_target': 'aosp_atd', 'arch': 'x86_64'}
           - {'api_level': 32, 'api_type_target': 'aosp_atd', 'arch': 'x86_64'}
