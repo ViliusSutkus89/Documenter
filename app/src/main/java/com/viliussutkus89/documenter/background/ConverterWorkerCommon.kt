@@ -21,7 +21,6 @@ package com.viliussutkus89.documenter.background
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
-import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.concurrent.futures.CallbackToFutureAdapter
@@ -75,9 +74,7 @@ abstract class ConverterWorkerCommon(ctx: Context, params: WorkerParameters): Re
 
     override fun getForegroundInfoAsync(): ListenableFuture<ForegroundInfo?> {
         return CallbackToFutureAdapter.getFuture {
-            it.set(ForegroundInfo(id.hashCode(), createNotification(applicationContext),
-                if (Build.VERSION.SDK_INT >= 29) FOREGROUND_SERVICE_TYPE_DATA_SYNC else 0
-            ))
+            it.set(ForegroundInfo(id.hashCode(), createNotification(applicationContext)))
         }
     }
 
