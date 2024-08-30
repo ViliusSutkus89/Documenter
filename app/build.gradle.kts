@@ -115,7 +115,7 @@ dependencies {
 
     implementation("androidx.webkit:webkit:1.11.0")
 
-    implementation("app.opendocument:pdf2htmlex-android:0.18.25")
+    implementation("app.opendocument:pdf2htmlex-android:0.18.26")
     implementation("com.viliussutkus89:wvware-android:1.2.9")
 
     implementation("com.mikepenz:aboutlibraries:10.10.0")
